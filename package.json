@@ -1,9 +1,0 @@
-{
-  "name": "zi-ci-lianxi",
-  "version": "1.0.0",
-  "description": "三年级下册字词句专项练习",
-  "private": true,
-  "scripts": {
-    "dev": "npx serve public"
-  }
-}

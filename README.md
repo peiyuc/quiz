@@ -4,28 +4,18 @@
 
 ## 本地预览
 
-```bash
-npm run dev
-```
+直接浏览器打开 `index.html`，或启动本地服务器：
 
-或直接打开 `public/index.html`。
+```bash
+python3 -m http.server 8081
+```
 
 ## 部署到 Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/your-repo)
+1. 把代码推送到 GitHub
+2. 在 [Vercel](https://vercel.com/new) 导入仓库
+3. Framework Preset 选 **Other**（纯静态）
+4. Build Command 留空，Output Directory 留空
+5. 点击 Deploy
 
-或连接 GitHub 仓库后，Vercel 会自动识别 `public/` 目录并部署。
-
-## 目录结构
-
-```
-public/
-  ├── index.html    # 入口页面
-  └── data.js       # 题库数据
-```
-
-## 技术说明
-
-- 纯静态站点，无后端依赖
-- 错题数据存储在浏览器 `localStorage` 中
-- 如需云端同步，可后续扩展 `api/` 目录接入 Vercel Serverless Functions
+Vercel 会自动识别根目录的 `index.html` 作为入口。
