@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>三年级下册字词练字 - 26春生字词句专项版</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      font-family: "Microsoft YaHei", -apple-system, sans-serif;
+      background: #fdfbf7; /* 温暖舒缓的书纸背景色 */
+      
+      /* iPad 物理防晃：强制固定定位，从系统底层锁死默认滚动 */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      
+      display: flex;
+      flex-direction: column;
+      touch-action: none; /* 禁用系统级默认手势操作（缩放和整页拖动） */
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      color: #333;
+    }
+    
+    /* 核心修复：解决 iOS/iPad Safari 无法聚焦或在输入框中打字的问题 */
+    input {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-bottom: 2px solid #e2e8f0;
+      z-index: 10;
+    }
+    h1 {
+      font-size: 18px;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-logo {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+    select {
+      padding: 6px 12px;
+      margin-left: 5px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 14px;
+      color: #334155;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus {
+      border-color: #3b82f6;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      overflow: hidden; /* 防止主容器出现额外滚动条 */
+    }
+    .left {
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+      border: 1px solid #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    /* 错题复习模式专用顶部提示条 */
+    #reviewBanner {
+      display: none;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      padding: 10px 15px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      color: #b91c1c;
+      font-size: 15px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* 句子提示区 */
+    #sentenceShow {
+      display: none;
+      font-size: 20px;
+      line-height: 1.6;
+      text-align: center;
+      margin: 15px 0;
+      padding: 12px 18px;
+      background-color: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .sentence-highlight {
+      color: #2563eb;
+      font-weight: bold;
+      border-bottom: 2px solid #2563eb;
+      padding: 0 4px;
+      margin: 0 2px;
+    }
+    .sentence-blank {
+      color: #2563eb;
+      font-weight: bold;
+      border-bottom: 2px dashed #2563eb;
+      padding: 0 8px;
+      margin: 0 4px;
+    }
+
+    /* 拼音展示区 */
+    #pinyinShow {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 5px;
+      color: #0369a1;
+      letter-spacing: 2px;
+    }
+
+    /* 拼音下面的正确答案参考小格子 */
+    .correct-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px 0 15px 0;
+      min-height: 48px;
+    }
+    .small-box {
+      width: 44px;
+      height: 44px;
+      border: 1px dashed #fca5a5;
+      background: #fffbfb;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      /* 核心修复：添加苹果系统内置楷体 "Kaiti SC" 与 "Kaiti TC" */
+      font-family: "Kaiti SC", "Kaiti TC", KaiTi, STKaiti, "华文楷体", serif;
+      font-weight: bold;
+      color: #1e293b; /* 默认黑色，错题改为红色 */
+      box-shadow: inset 0 0 3px rgba(220, 38, 38, 0.03);
+      position: relative;
+    }
+    /* 米字虚线辅助 */
+    .small-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(to right, transparent 49%, rgba(248, 113, 113, 0.15) 49%, rgba(248, 113, 113, 0.15) 51%, transparent 51%),
+        linear-gradient(to bottom, transparent 49%, rgba(248, 113, 113, 0.15) 49%, rgba(248, 113, 113, 0.15) 51%, transparent 51%);
+      pointer-events: none;
+    }
+
+    /* 大字格米字格样式 */
+    #charContainer {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 15px 0;
+      flex-wrap: wrap; /* 自适应换行，防止手机溢出 */
+    }
+    .box {
+      position: relative;
+      border: 3px solid #b91c1c; /* 经典中国红边框 */
+      width: 120px;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      transition: all 0.2s;
+    }
+    /* 米字格虚线生成 */
+    .box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(to right, transparent 49.5%, #fca5a5 49.5%, #fca5a5 50.5%, transparent 50.5%),
+        linear-gradient(to bottom, transparent 49.5%, #fca5a5 49.5%, #fca5a5 50.5%, transparent 50.5%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .box::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(135deg, transparent 49.5%, #fecaca 49.5%, #fecaca 50.5%, transparent 50.5%),
+        linear-gradient(45deg, transparent 49.5%, #fecaca 49.5%, #fecaca 50.5%, transparent 50.5%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    /* 批改状态样式 */
+    .box-correct {
+      border-color: #10b981 !important;
+      background: #ecfdf5;
+    }
+    .box-wrong {
+      border-color: #ef4444 !important;
+      background: #fef2f2;
+      animation: shake 0.4s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* 输入框框 */
+    .input-word {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      font-size: 72px;
+      text-align: center;
+      outline: none;
+      /* 核心修复：添加苹果系统内置楷体 "Kaiti SC" 与 "Kaiti TC" */
+      font-family: "Kaiti SC", "Kaiti TC", KaiTi, STKaiti, "华文楷体", serif;
+      font-weight: bold;
+      color: #1e293b;
+      z-index: 2;
+      caret-color: #b91c1c;
+    }
+
+    /* =================== 看字写拼音模式专用拼音列、四线三格样式 =================== */
+    .pinyin-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* 四线三格基础容器 */
+    .four-line-box {
+      position: relative;
+      width: 130px;
+      height: 70px;
+      background: #fafaf9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    /* 激活聚焦效果 */
+    .input-four-line-active {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+    }
+    
+    /* 四线三格中的红线 */
+    .grid-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      pointer-events: none;
+    }
+    .line-red-solid {
+      background-color: #f87171;
+      opacity: 0.8;
+    }
+    .line-red-dashed {
+      border-top: 1px dashed #fca5a5;
+      opacity: 0.8;
+    }
+    
+    /* 拼音输入框 */
+    .pinyin-input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: bold;
+      color: #1e293b;
+      outline: none;
+      z-index: 2;
+      line-height: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 23px; /* 将拼音基准线完美放在第三条线上 */
+    }
+
+    /* 拼音字头上的正确答案格子 */
+    .answer-four-line {
+      opacity: 0; /* 核对前隐藏 */
+      background: #fff;
+      border: 1px dashed #feca57;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .answer-four-line.show-answer {
+      opacity: 1;
+    }
+    
+    .correct-text {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding-bottom: 23px; /* 完美对齐拼音底线 */
+    }
+    /* 正确和错误答案字体颜色 */
+    .correct-text.color-correct {
+      color: #1e293b; /* 答对显示黑色 */
+    }
+    .correct-text.color-wrong {
+      color: #dc2626; /* 答错显示红色 */
+    }
+
+    /* 中间显示的提示生字 */
+    .prompt-char-label {
+      /* 核心修复：添加苹果系统内置楷体 "Kaiti SC" 与 "Kaiti TC" */
+      font-family: "Kaiti SC", "Kaiti TC", KaiTi, STKaiti, "华文楷体", serif;
+      font-size: 32px;
+      font-weight: bold;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+      background-color: #f8fafc;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.05);
+    }
+    
+    /* =================== 内置拼音输入软键盘样式 =================== */
+    .keyboard-container {
+      display: none; /* 默认隐藏，写拼音模式开启时显示 */
+      flex-direction: column;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin: 10px 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .keyboard-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .key-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-bottom: 3px solid #94a3b8;
+      color: #334155;
+      padding: 6px 4px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      min-width: 34px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.05s;
+    }
+    .key-btn:active {
+      transform: translateY(2px);
+      border-bottom-width: 1px;
+    }
+    .key-btn.special-key {
+      background: #cbd5e1;
+      border-bottom-color: #64748b;
+      font-size: 13px;
+      min-width: 52px;
+    }
+    .keyboard-title {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    /* =================================================================================== */
+
+    /* 按钮样式 */
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn.blue {
+      background: #2563eb;
+    }
+    .btn.blue:hover {
+      background: #1d4ed8;
+    }
+    .btn.gray {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+    .btn.gray:hover {
+      background: #e2e8f0;
+    }
+    .btn.green {
+      background: #10b981;
+    }
+    .btn.green:hover {
+      background: #059669;
+    }
+    .btn.red {
+      background: #ef4444;
+    }
+    .btn.red:hover {
+      background: #dc2626;
+    }
+    
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    /* 错题数指示器 */
+    .err-tag {
+      background: #fee2e2;
+      color: #ef4444;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      border: 1px solid #fecaca;
+    }
+    
+    /* 弹窗设计 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 15px;
+    }
+    .modal-content {
+      background: #fff;
+      width: 100%;
+      max-width: 550px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+    #errList {
+      margin-top: 15px;
+      line-height: 1.8;
+      max-height: 300px; /* 固定列表最大高度，方便内容滚动 */
+      overflow-y: auto;  /* 允许在错题本列表中滑动 */
+    }
+    .err-item {
+      padding: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+    }
+    .err-item:last-child {
+      border-bottom: none;
+    }
+    .err-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .err-info {
+      color: #475569;
+    }
+    .err-word {
+      font-weight: bold;
+      color: #b91c1c;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+    .err-badge {
+      background: #fef2f2;
+      color: #ef4444;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #fee2e2;
+    }
+    
+    .tip-text {
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    /* 顶部导航错题区 */
+    .error-widget {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px dashed #cbd5e1;
+    }
+    .error-widget span {
+      font-size: 14px;
+      color: #475569;
+    }
+
+    /* 移除按钮 */
+    .del-err-btn {
+      color: #ef4444;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .del-err-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span class="header-logo">练</span> 三年级下册字词大格子练字</h1>
+  <div>
+    <select id="unitSelect">
+      <option value="all">全部单元</option>
+      <option value="1">第一单元</option>
+      <option value="2">第二单元</option>
+      <option value="3">第三单元</option>
+      <option value="4">第四单元</option>
+      <option value="5">第五单元</option>
+      <option value="6">第六单元</option>
+      <option value="7">第七单元</option>
+      <option value="8">第八单元</option>
+    </select>
+    <select id="lessonSelect">
+      <option value="all">全部课文</option>
+    </select>
+    <select id="typeSelect">
+      <option value="spell">看拼音写字 (词语)</option>
+      <option value="pinyin">看字写拼音 (词语)</option>
+      <option value="sentence-spell">看拼音填空 (句子)</option>
+      <option value="sentence-pinyin">看字填拼音 (句子)</option>
+    </select>
+  </div>
+</header>
+
+<div class="main">
+  <div class="left">
+    <!-- 错题复习模式醒目顶部 Banner -->
+    <div id="reviewBanner">
+      <span>📢 正在【错题复习模式】中</span>
+      <button id="exitReviewBtn" class="btn red" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; line-height: 1;">退出复习</button>
+    </div>
+
+    <div>
+      <p class="tip-text" id="tip">请直接在格子里写字（系统自动转标准字）</p>
+      
+      <!-- 句子提示语区 (在造造句模式下显示) -->
+      <div id="sentenceShow"></div>
+
+      <!-- 拼音/生字提示 -->
+      <p id="pinyinShow"></p>
+      
+      <!-- 拼音模式下：正确答案小格子对照区 -->
+      <div class="correct-container" id="correctGrids">
+        <!-- 核对后在此处显示正确答案 -->
+      </div>
+      
+      <!-- 用户输入格子存放区 -->
+      <div id="charContainer"></div>
+      
+      <!-- 拼音模式下专属：内置虚拟声调键盘 -->
+      <div class="keyboard-container" id="pinyinKeyboard">
+        <div class="keyboard-title">💡 屏幕拼音声调辅助输入（直接点击可打出带声调的字母）</div>
+        <!-- a o e -->
+        <div class="keyboard-row">
+          <button class="key-btn" onclick="insertVirtualKey('ā')">ā</button>
+          <button class="key-btn" onclick="insertVirtualKey('á')">á</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǎ')">ǎ</button>
+          <button class="key-btn" onclick="insertVirtualKey('à')">à</button>
+          <span style="width: 10px;"></span>
+          <button class="key-btn" onclick="insertVirtualKey('ō')">ō</button>
+          <button class="key-btn" onclick="insertVirtualKey('ó')">ó</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǒ')">ǒ</button>
+          <button class="key-btn" onclick="insertVirtualKey('ò')">ò</button>
+          <span style="width: 10px;"></span>
+          <button class="key-btn" onclick="insertVirtualKey('ē')">ē</button>
+          <button class="key-btn" onclick="insertVirtualKey('é')">é</button>
+          <button class="key-btn" onclick="insertVirtualKey('ě')">ě</button>
+          <button class="key-btn" onclick="insertVirtualKey('è')">è</button>
+        </div>
+        <!-- i u ü -->
+        <div class="keyboard-row" style="margin-top: 4px;">
+          <button class="key-btn" onclick="insertVirtualKey('ī')">ī</button>
+          <button class="key-btn" onclick="insertVirtualKey('í')">í</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǐ')">ǐ</button>
+          <button class="key-btn" onclick="insertVirtualKey('ì')">ì</button>
+          <span style="width: 10px;"></span>
+          <button class="key-btn" onclick="insertVirtualKey('ū')">ū</button>
+          <button class="key-btn" onclick="insertVirtualKey('ú')">ú</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǔ')">ǔ</button>
+          <button class="key-btn" onclick="insertVirtualKey('ù')">ù</button>
+          <span style="width: 10px;"></span>
+          <button class="key-btn" onclick="insertVirtualKey('ü')">ü</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǘ')">ǘ</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǚ')">ǚ</button>
+          <button class="key-btn" onclick="insertVirtualKey('ǜ')">ǜ</button>
+        </div>
+        <!-- 基础英文字母与退格清除 -->
+        <div class="keyboard-row" style="margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+          <button class="key-btn" onclick="insertVirtualKey('a')">a</button>
+          <button class="key-btn" onclick="insertVirtualKey('b')">b</button>
+          <button class="key-btn" onclick="insertVirtualKey('c')">c</button>
+          <button class="key-btn" onclick="insertVirtualKey('d')">d</button>
+          <button class="key-btn" onclick="insertVirtualKey('e')">e</button>
+          <button class="key-btn" onclick="insertVirtualKey('f')">f</button>
+          <button class="key-btn" onclick="insertVirtualKey('g')">g</button>
+          <button class="key-btn" onclick="insertVirtualKey('h')">h</button>
+          <button class="key-btn" onclick="insertVirtualKey('i')">i</button>
+          <button class="key-btn" onclick="insertVirtualKey('j')">j</button>
+          <button class="key-btn" onclick="insertVirtualKey('k')">k</button>
+          <button class="key-btn" onclick="insertVirtualKey('l')">l</button>
+          <button class="key-btn" onclick="insertVirtualKey('m')">m</button>
+        </div>
+        <div class="keyboard-row" style="margin-top: 4px;">
+          <button class="key-btn" onclick="insertVirtualKey('n')">n</button>
+          <button class="key-btn" onclick="insertVirtualKey('o')">o</button>
+          <button class="key-btn" onclick="insertVirtualKey('p')">p</button>
+          <button class="key-btn" onclick="insertVirtualKey('q')">q</button>
+          <button class="key-btn" onclick="insertVirtualKey('r')">r</button>
+          <button class="key-btn" onclick="insertVirtualKey('s')">s</button>
+          <button class="key-btn" onclick="insertVirtualKey('t')">t</button>
+          <button class="key-btn" onclick="insertVirtualKey('u')">u</button>
+          <button class="key-btn" onclick="insertVirtualKey('v')">v</button>
+          <button class="key-btn" onclick="insertVirtualKey('w')">w</button>
+          <button class="key-btn" onclick="insertVirtualKey('x')">x</button>
+          <button class="key-btn" onclick="insertVirtualKey('y')">y</button>
+          <button class="key-btn" onclick="insertVirtualKey('z')">z</button>
+        </div>
+        <div class="keyboard-row" style="margin-top: 4px;">
+          <button class="key-btn special-key" onclick="insertVirtualKey('backspace')">退格 ⌫</button>
+          <button class="key-btn special-key" onclick="insertVirtualKey('clear')">清空 ✘</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 错题本快捷信息 -->
+    <div class="error-widget">
+      <span>错题本已存入 <span id="errCount" class="err-tag">0</span> 个词语</span>
+      <button id="openErrBtn" class="btn blue" style="padding: 6px 14px; font-size: 13px; border-radius: 6px;">打开错题本</button>
+    </div>
+
+    <!-- 交互控制面板 -->
+    <div class="row">
+      <button id="prevBtn" class="btn gray" style="flex:1">上一题</button>
+      <button id="checkBtn" class="btn green" style="flex:1.5">核对答案</button>
+      <button id="addErrBtn" class="btn red" style="flex:1">加入错题</button>
+      <button id="nextBtn" class="btn gray" style="flex:1">下一题</button>
+    </div>
+  </div>
+</div>
+
+<!-- 错题本复窗 -->
+<div id="errModal" class="modal">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">
+      <h2 style="font-size: 18px; color: #1e293b;">我的错题库</h2>
+      <button id="closeModal" style="border:none;background:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1;">&times;</button>
+    </div>
+    
+    <div style="margin:12px 0; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #edf2f7;">
+      <p style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 6px;">错题复习模式：</p>
+      <label style="cursor: pointer; font-size:14px;"><input type="radio" name="sortMode" value="freq" checked> 按错词频次</label>
+      <label style="margin:0 12px; cursor: pointer; font-size:14px;"><input type="radio" name="sortMode" value="lesson"> 按单元顺序</label>
+      <label style="cursor: pointer; font-size:14px;"><input type="radio" name="sortMode" value="random"> 随机练习</label>
+      <button id="startReview" class="btn green" style="margin-left:12px; padding: 6px 12px; font-size: 13px; border-radius:6px;">开始复习</button>
+    </div>
+    
+    <div id="errList"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const lessonMap = {
+  "1": [{ id: "1", name: "第1课《古诗三首》" }, { id: "2", name: "第2课《燕子》" }, { id: "3", name: "第3课《荷花》" }],
+  "2": [{ id: "5", name: "第5课《守株待兔》" }, { id: "6", name: "第6课《会摇尾巴的狼》" }, { id: "7", name: "第7课《鹿角和鹿腿》" }, { id: "8", name: "第8课《池子与河流》" }],
+  "3": [{ id: "9", name: "第9课《古诗三首》" }, { id: "10", name: "第10课《纸的发明》" }, { id: "11", name: "第11课《赵州桥》" }],
+  "4": [{ id: "13", name: "第13课《花钟》" }, { id: "14", name: "第14课《蜜蜂》" }, { id: "15", name: "第15课《小虾》" }],
+  "5": [{ id: "16", name: "第16课《胡萝卜先生的长胡子》" }, { id: "17", name: "第17课《我变成了一棵树》" }],
+  "6": [{ id: "18", name: "第18课《童年的水墨画》" }, { id: "19", name: "第19课《肥皂泡》" }],
+  "7": [{ id: "22", name: "第22课《火烧云》" }, { id: "23", name: "第23课《暴风雨来临之前》" }],
+  "8": [{ id: "25", name: "第25课《慢性子裁缝和急性子顾客》" }, { id: "26", name: "第26课《漏》" }, { id: "27", name: "第27课《枣核》" }, { id: "28", name: "语文园地八" }]
+};
+
+let currentIdx = 0; 
+let filterWords = [...wordLib]; 
+let errorList = JSON.parse(localStorage.getItem("threeErrWords")) || []; 
+let activeInput = null;
+let autoNextTimeout = null; // 自动跳转延时锁
+let isReviewMode = false;   // 错题复习模式标记
+
+document.addEventListener("DOMContentLoaded", function(){
+  // 安全事件绑定函数：当部分 DOM 元素因延迟加载或特定渲染时返回 null 时，不中断 JavaScript 编译
+  function safeAddListener(id, event, handler) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener(event, handler);
+    } else {
+      console.warn(`[DOM Warning] 无法找到元素: "${id}"`);
+    }
+  }
+
+  safeAddListener("unitSelect", "change", function() { updateLessonSelect(); filterWord(); });
+  safeAddListener("lessonSelect", "change", filterWord);
+  safeAddListener("typeSelect", "change", renderWord);
+  safeAddListener("prevBtn", "click", prevWord);
+  safeAddListener("nextBtn", "click", nextWord);
+  safeAddListener("checkBtn", "click", checkAnswer);
+  safeAddListener("addErrBtn", "click", manualAddErr);
+  safeAddListener("openErrBtn", "click", showErrModal);
+  safeAddListener("closeModal", "click", hideErrModal);
+  safeAddListener("startReview", "click", startReview);
+  safeAddListener("exitReviewBtn", "click", exitReview);
+
+  // iPad防晃终极拦截器：如果滑动的不是错题弹窗里的列表，则一律阻止页面整体滚动
+  document.addEventListener('touchmove', function(e) {
+    if (e.target.closest('#errList, .modal-content')) {
+      return; // 允许弹窗内的列表正常滑动查看
+    }
+    e.preventDefault(); // 拦截、锁定主屏幕的晃动和滚动
+  }, { passive: false });
+
+  updateLessonSelect(); updateErrCount(); renderWord(); renderErrList();
+});
+
+function updateLessonSelect() {
+  const uEl = document.getElementById("unitSelect");
+  const lessonSelect = document.getElementById("lessonSelect");
+  if (!uEl || !lessonSelect) return; // 核心防御保护：防止返回 null 导致崩溃报错
+  
+  const u = uEl.value;
+  lessonSelect.innerHTML = '<option value="all">全部课文</option>';
+  if (u === "all") {
+    for (const unitKey in lessonMap) { lessonMap[unitKey].forEach(l => { const opt = document.createElement("option"); opt.value = l.id; opt.innerText = l.name; lessonSelect.appendChild(opt); }); }
+  } else if (lessonMap[u]) { lessonMap[u].forEach(l => { const opt = document.createElement("option"); opt.value = l.id; opt.innerText = l.name; lessonSelect.appendChild(opt); }); }
+}
+
+function filterWord() {
+  const uSelect = document.getElementById("unitSelect");
+  const lSelect = document.getElementById("lessonSelect");
+  if (!uSelect || !lSelect) return;
+  const u = uSelect.value; const l = lSelect.value;
+  
+  // 任何手动的下拉筛选都会使系统自动退出复习模式
+  isReviewMode = false;
+  const rBanner = document.getElementById("reviewBanner");
+  if (rBanner) rBanner.style.display = "none";
+
+  let temp = u === "all" ? [...wordLib] : wordLib.filter(x => x.unit === u);
+  filterWords = l === "all" ? temp : temp.filter(x => x.lessonId === l);
+  currentIdx = 0; renderWord();
+}
+
+function renderWord(){
+  activeInput = null; 
+  if (autoNextTimeout) { clearTimeout(autoNextTimeout); autoNextTimeout = null; } // 清除可能的未完成跳转
+
+  const pyShow = document.getElementById("pinyinShow");
+  const sShow = document.getElementById("sentenceShow");
+  const charC = document.getElementById("charContainer");
+  const corrC = document.getElementById("correctGrids");
+  const pyKb = document.getElementById("pinyinKeyboard");
+
+  if(filterWords.length===0){ 
+    if (pyShow) {
+      pyShow.innerText = "暂无习题"; 
+      pyShow.style.display = "block"; 
+    }
+    if (sShow) sShow.style.display = "none"; 
+    if (charC) charC.innerHTML = ""; 
+    if (corrC) corrC.innerHTML = ""; 
+    if (pyKb) pyKb.style.display = "none"; 
+    return; 
+  }
+  const now = filterWords[currentIdx]; 
+  const typeSelect = document.getElementById("typeSelect");
+  if (!typeSelect || !charC || !corrC || !sShow || !pyShow) return;
+  
+  const type = typeSelect.value;
+  charC.innerHTML = "";
+  if (type === "spell") {
+    sShow.style.display = "none"; pyShow.style.display = "block"; pyShow.innerText = now.pinyin; document.getElementById("tip").innerText = "请在格子里写字"; if (pyKb) pyKb.style.display = "none";
+    corrC.style.display = "flex"; corrC.innerHTML = "";
+    for(let i=0; i < now.word.length; i++){ const sBox = document.createElement("div"); sBox.className = "small-box"; sBox.innerText = ""; sBox.id = `sbox-${i}`; corrC.appendChild(sBox); }
+    renderBigBoxes(now.word);
+  } else if (type === "pinyin") {
+    sShow.style.display = "none"; pyShow.style.display = "none"; document.getElementById("tip").innerText = "请在四线三格内写出正确拼音"; if (pyKb) pyKb.style.display = "flex"; corrC.style.display = "none";
+    renderFourLines(now.word, now.pinyin);
+  } else if (type === "sentence-spell") {
+    pyShow.style.display = "block"; pyShow.innerText = now.targetPinyin; document.getElementById("tip").innerText = "请在格子里填入句子中空白处的正确字词"; if (pyKb) pyKb.style.display = "none";
+    sShow.style.display = "block"; const blankHtml = `<span class="sentence-blank">（ ？ ）</span>`; sShow.innerHTML = now.sentence.replace(`[${now.target}]`, blankHtml);
+    corrC.style.display = "flex"; corrC.innerHTML = "";
+    for(let i=0; i < now.target.length; i++){ const sBox = document.createElement("div"); sBox.className = "small-box"; sBox.innerText = ""; sBox.id = `sbox-${i}`; corrC.appendChild(sBox); }
+    renderBigBoxes(now.target);
+  } else if (type === "sentence-pinyin") {
+    pyShow.style.display = "none"; document.getElementById("tip").innerText = "请在四线三格内写出句中蓝色生字的正确拼音"; if (pyKb) pyKb.style.display = "flex"; corrC.style.display = "none";
+    sShow.style.display = "block"; const highlightHtml = `<span class="sentence-highlight">${now.target}</span>`; sShow.innerHTML = now.sentence.replace(`[${now.target}]`, highlightHtml);
+    renderFourLines(now.target, now.targetPinyin);
+  }
+}
+
+// 自动检测并核对答案，若全对则自动翻页
+function checkAndAutoSubmit() {
+  const typeSelect = document.getElementById("typeSelect");
+  if (!typeSelect) return;
+  const type = typeSelect.value;
+  // 仅在“看拼音写字 (词语)” 与 “看拼音填空 (句子)” 模式下进行字满自动跳转
+  if (type !== "spell" && type !== "sentence-spell") return;
+
+  const inputs = document.querySelectorAll("#charContainer .input-word");
+  let allFilled = true;
+  inputs.forEach(input => {
+    if (!input.value.trim()) {
+      allFilled = false;
+    }
+  });
+
+  if (allFilled) {
+    // 延迟 150 毫秒，避免输入法未完全落字完成即被翻页切断
+    setTimeout(() => {
+      const boxes = document.querySelectorAll("#charContainer .box");
+      let isAllCorrect = true;
+      boxes.forEach(box => {
+        const input = box.querySelector(".input-word");
+        if (input.value.trim() !== input.dataset.answer.trim()) {
+          isAllCorrect = false;
+        }
+      });
+
+      // 先进行常规判定
+      checkAnswer();
+
+      if (isAllCorrect) {
+        if (autoNextTimeout) clearTimeout(autoNextTimeout);
+        // 如果正确，1秒后自动切换到下一题
+        autoNextTimeout = setTimeout(() => {
+          nextWord();
+        }, 1000);
+      }
+    }, 150);
+  }
+}
+
+function renderBigBoxes(targetWord) {
+  const container = document.getElementById("charContainer"); const chars = targetWord.split("");
+  chars.forEach((ansChar, idx) => {
+    const boxDiv = document.createElement("div"); boxDiv.className = "box"; const inputEle = document.createElement("input"); inputEle.className = "input-word"; inputEle.maxLength = 1; inputEle.dataset.answer = ansChar;
+    inputEle.addEventListener("input", function() { 
+      if (this.value.length >= 1) { 
+        const nextBox = boxDiv.nextElementSibling; 
+        if (nextBox) { 
+          const nextInput = nextBox.querySelector(".input-word"); 
+          if (nextInput) nextInput.focus(); 
+        } 
+      }
+      checkAndAutoSubmit(); // 每次字符输入后触发自动检查判定
+    });
+    boxDiv.appendChild(inputEle); container.appendChild(boxDiv);
+  });
+}
+
+function renderFourLines(targetWord, targetPinyin) {
+  const container = document.getElementById("charContainer"); const pinyins = targetPinyin.split(" "); const words = targetWord.split("");
+  pinyins.forEach((correctPy, idx) => {
+    const wordChar = words[idx] || ""; const columnDiv = document.createElement("div"); columnDiv.className = "pinyin-column";
+    const answerBox = document.createElement("div"); answerBox.className = "four-line-box answer-four-line"; answerBox.id = `ans-box-${idx}`;
+    answerBox.innerHTML = `<div class="grid-line line-red-solid" style="top: 15%;"></div><div class="grid-line line-red-dashed" style="top: 38.3%;"></div><div class="grid-line line-red-dashed" style="top: 61.6%;"></div><div class="grid-line line-red-solid" style="top: 85%;"></div><span class="correct-text" id="ans-text-${idx}"></span>`;
+    const charLabel = document.createElement("div"); charLabel.className = "prompt-char-label"; charLabel.innerText = wordChar;
+    const inputBox = document.createElement("div"); inputBox.className = "four-line-box input-four-line"; inputBox.id = `input-box-container-${idx}`;
+    inputBox.innerHTML = `<div class="grid-line line-red-solid" style="top: 15%;"></div><div class="grid-line line-red-dashed" style="top: 38.3%;"></div><div class="grid-line line-red-dashed" style="top: 61.6%;"></div><div class="grid-line line-red-solid" style="top: 85%;"></div>`;
+    const inputEle = document.createElement("input"); inputEle.className = "pinyin-input"; inputEle.type = "text"; inputEle.dataset.answer = correctPy; inputEle.autocomplete = "off"; inputEle.autocorrect = "off"; inputEle.autocapitalize = "off"; inputEle.setAttribute("spellcheck", "false");
+    inputEle.addEventListener("focus", function() { activeInput = this; document.querySelectorAll(".input-four-line").forEach(box => { box.classList.remove("input-four-line-active"); }); inputBox.classList.add("input-four-line-active"); });
+    inputEle.addEventListener("keydown", function(e) { if (e.key === " " || e.key === "Enter") { e.preventDefault(); const nextCol = columnDiv.nextElementSibling; if (nextCol) { const nextInput = nextCol.querySelector(".pinyin-input"); if (nextInput) nextInput.focus(); } } });
+    inputBox.appendChild(inputEle); columnDiv.appendChild(answerBox); columnDiv.appendChild(charLabel); columnDiv.appendChild(inputBox); container.appendChild(columnDiv);
+  });
+}
+function insertVirtualKey(char) {
+  if (!activeInput) { const firstInput = document.querySelector(".pinyin-input"); if (firstInput) { firstInput.focus(); activeInput = firstInput; } else { return; } }
+  const input = activeInput; const start = input.selectionStart || 0; const end = input.selectionEnd || 0; const val = input.value;
+  if (char === "backspace") { if (start === end && start > 0) { input.value = val.substring(0, start - 1) + val.substring(end); input.setSelectionRange(start - 1, start - 1); } else if (start !== end) { input.value = val.substring(0, start) + val.substring(end); input.setSelectionRange(start, start); } }
+  else if (char === "clear") { input.value = ""; input.setSelectionRange(0, 0); }
+  else { input.value = val.substring(0, start) + char + val.substring(end); const newPos = start + char.length; input.setSelectionRange(newPos, newPos); }
+  input.focus();
+}
+function prevWord(){ if(currentIdx>0){ currentIdx--; renderWord(); } }
+function nextWord(){ if(currentIdx<filterWords.length-1){ currentIdx++; renderWord(); } }
+function checkAnswer(){
+  if(filterWords.length === 0) return;
+  const now = filterWords[currentIdx]; const type = document.getElementById("typeSelect").value; let hasWrong = false; let userInputs = [];
+  if (type === "spell" || type === "sentence-spell") {
+    const targetWord = (type === "spell") ? now.word : now.target; const boxes = document.querySelectorAll("#charContainer .box");
+    boxes.forEach((box, i) => {
+      const input = box.querySelector(".input-word"); const userAns = input.value.trim(); const rightAns = input.dataset.answer.trim();
+      userInputs.push(input.value.trim() || "空");
+      if(userAns === rightAns && userAns !== ""){ box.className = "box box-correct"; } else { box.className = "box box-wrong"; hasWrong = true; }
+    });
+    targetWord.split("").forEach((char, i) => {
+      const sBox = document.getElementById(`sbox-${i}`);
+      if (sBox) { sBox.innerText = char; const input = boxes[i]?.querySelector(".input-word"); sBox.style.color = (input && input.value.trim() === char) ? "#1e293b" : "#dc2626"; }
+    });
+  } else {
+    document.querySelectorAll(".pinyin-column").forEach((column, i) => {
+      const input = column.querySelector(".pinyin-input"); const answerText = column.querySelector(".correct-text"); const answerBox = column.querySelector(".answer-four-line"); const inputBox = column.querySelector(".input-four-line");
+      const userAns = input.value.trim().toLowerCase(); const rightAns = input.dataset.answer.trim().toLowerCase();
+      userInputs.push(input.value.trim() || "空"); answerText.innerText = input.dataset.answer; answerBox.classList.add("show-answer"); inputBox.classList.remove("input-four-line-active");
+      if (userAns === rightAns && userAns !== "") { inputBox.style.borderColor = "#10b981"; inputBox.style.backgroundColor = "#ecfdf5"; answerText.className = "correct-text color-correct"; }
+      else { inputBox.style.borderColor = "#ef4444"; inputBox.style.backgroundColor = "#fef2f2"; answerText.className = "correct-text color-wrong"; hasWrong = true; inputBox.style.animation = "shake 0.4s ease-in-out"; setTimeout(() => { inputBox.style.animation = ""; }, 400); }
+    });
+  }
+  const userAttemptStr = (type === "spell" || type === "sentence-spell") ? userInputs.join("") : userInputs.join(" ");
+  if(hasWrong) { autoAddErr(now, userAttemptStr); }
+}
+function autoAddErr(now, wrongAns) {
+  let find = errorList.find(item => item.word === now.word);
+  if(find){ find.errCount++; find.lastWrong = wrongAns; }else{ errorList.push({...now, errCount: 1, lastWrong: wrongAns}); }
+  localStorage.setItem("threeErrWords", JSON.stringify(errorList)); updateErrCount(); renderErrList();
+}
+function manualAddErr(){
+  if(filterWords.length === 0) return; const now = filterWords[currentIdx]; let userInputs = []; const type = document.getElementById("typeSelect").value;
+  document.querySelectorAll(".input-word, .pinyin-input").forEach(input => { userInputs.push(input.value.trim() || "空"); });
+  autoAddErr(now, (type === "spell" || type === "sentence-spell") ? userInputs.join("") : userInputs.join(" "));
+}
+function removeErr(wordText) { errorList = errorList.filter(item => item.word !== wordText); localStorage.setItem("threeErrWords", JSON.stringify(errorList)); updateErrCount(); renderErrList(); }
+function updateErrCount(){ 
+  const errCount = document.getElementById("errCount");
+  if (errCount) errCount.innerText = errorList.length; 
+}
+function showErrModal(){ 
+  const errModal = document.getElementById("errModal");
+  if (errModal) errModal.style.display = "flex"; 
+  renderErrList(); 
+}
+function hideErrModal(){ 
+  const errModal = document.getElementById("errModal");
+  if (errModal) errModal.style.display = "none"; 
+}
+function renderErrList(){
+  const listDom = document.getElementById("errList"); if (!listDom) return;
+  listDom.innerHTML = ""; if(errorList.length===0){ listDom.innerHTML = "<div class='err-item' style='color:#94a3b8; text-align:center;'>暂无错题记录，你太棒了！</div>"; return; }
+  errorList.forEach(item=>{
+    const div = document.createElement("div"); div.className = "err-item"; const topRow = document.createElement("div"); topRow.className = "err-row-top";
+    topRow.innerHTML = `<span class="err-info"><span class="err-word">${item.word}</span> <span style="color:#64748b;">[${item.pinyin}]</span> <span class="err-badge">单元${item.unit}</span></span><div style="display:flex;align-items:center;gap:15px;"><span style="color:#ef4444;font-size:13px;">累计错 ${item.errCount} 次</span><button class="del-err-btn" onclick="removeErr('${item.word}')">移出</button></div>`;
+    div.appendChild(topRow); div.innerHTML += `<div style="font-size:12px;color:#64748b;margin-top:2px;">上次错写为：<span style="color:#ef4444;font-weight:bold;background-color:#fff1f2;padding:1px 6px;border-radius:4px;border:1px solid #ffe4e6;">${item.lastWrong || "无输入"}</span></div>`;
+    listDom.appendChild(div);
+  });
+}
+function startReview(){
+  if(errorList.length===0) return; const modeEl = document.querySelector("input[name='sortMode']:checked"); if (!modeEl) return;
+  const mode = modeEl.value; let arr = [...errorList];
+  if(mode==="freq"){ arr.sort((a,b)=>b.errCount - a.errCount); }else if(mode==="lesson"){ arr.sort((a,b)=>parseInt(a.unit) - parseInt(b.unit)); }else{ arr.sort(()=>Math.random()-0.5); }
+  
+  // 激活错题复习模式
+  isReviewMode = true;
+  const rBanner = document.getElementById("reviewBanner");
+  if (rBanner) rBanner.style.display = "flex";
+
+  filterWords = arr; currentIdx = 0; hideErrModal(); renderWord();
+}
+function exitReview() {
+  isReviewMode = false;
+  const rBanner = document.getElementById("reviewBanner");
+  if (rBanner) rBanner.style.display = "none";
+  // 重新加载标准过滤下的题目列表
+  filterWord();
+}
+</script>
+</body>
+</html>
