@@ -942,12 +942,6 @@
       </div>
     </div>
 
-    <!-- 错题本快捷信息 -->
-    <div class="error-widget">
-      <span>错题本已存入 <span id="errCount" class="err-tag">0</span> 个词语</span>
-      <button id="openErrBtn" class="btn blue" style="padding: 6px 14px; font-size: 13px; border-radius: 6px;">打开错题本</button>
-    </div>
-
     <!-- 口算每日一练 -->
     <div id="mathContainer" class="math-container">
       <div class="math-header">
@@ -986,6 +980,12 @@
       <button id="checkBtn" class="btn green" style="flex:1.5">核对答案</button>
       <button id="addErrBtn" class="btn red" style="flex:1">加入错题</button>
       <button id="nextBtn" class="btn gray" style="flex:1">下一题</button>
+    </div>
+
+    <!-- 通用错题本 -->
+    <div class="error-widget" id="errorWidget">
+      <span>📚 错题本已收录 <span id="errCount" class="err-tag">0</span> 道</span>
+      <button id="openErrBtn" class="btn blue" style="padding: 6px 14px; font-size: 13px; border-radius: 6px;">打开错题本</button>
     </div>
   </div>
 </div>
@@ -1623,7 +1623,6 @@ function switchSubject(subject) {
   const charC = document.getElementById('charContainer');
   const corrC = document.getElementById('correctGrids');
   const pyKb = document.getElementById('pinyinKeyboard');
-  const errW = document.querySelector('.error-widget');
   const rBanner = document.getElementById('reviewBanner');
   const autoCheckWrap = document.getElementById('autoCheckWrap');
   const chineseHistoryBtn = document.getElementById('chineseHistoryBtn');
@@ -1641,7 +1640,7 @@ function switchSubject(subject) {
     if (charC) charC.style.display = 'none';
     if (corrC) corrC.style.display = 'none';
     if (pyKb) pyKb.style.display = 'none';
-    if (errW) errW.style.display = 'none';
+    // 错题本是通用能力，数学模式下也显示（已在 HTML 中控制位置）
     if (wordC) wordC.style.display = 'none';
     if (autoCheckWrap) autoCheckWrap.style.display = 'none';
     if (rBanner) rBanner.style.display = 'none';
@@ -1658,7 +1657,7 @@ function switchSubject(subject) {
     if (charC) charC.style.display = 'flex';
     if (corrC) corrC.style.display = 'flex';
     if (pyKb) pyKb.style.display = 'none';
-    if (errW) errW.style.display = 'flex';
+    // 错题本是通用能力，始终显示
     if (wordC) wordC.style.display = 'flex';
     if (autoCheckWrap) autoCheckWrap.style.display = 'flex';
     if (chineseHistoryBtn) chineseHistoryBtn.style.display = isDailyChinese ? 'inline-flex' : 'none';
