@@ -1338,7 +1338,7 @@ function startMath() {
   mathQuestions.forEach((item, idx) => {
     const div = document.createElement('div');
     div.className = 'math-item';
-    div.innerHTML = `<span class="math-q">${idx + 1}. ${item.q}</span><input type="number" class="math-input" id="math-${idx}" autocomplete="off" inputmode="numeric"><span class="math-ans">答案: ${item.a}</span>`;
+    div.innerHTML = `<span class="math-q">${item.q}</span><input type="number" class="math-input" id="math-${idx}" autocomplete="off" inputmode="numeric"><span class="math-ans">答案: ${item.a}</span>`;
     if (list) list.appendChild(div);
   });
 
