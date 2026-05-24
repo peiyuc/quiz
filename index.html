@@ -966,14 +966,18 @@
       <div class="math-history" id="mathHistory"></div>
     </div>
 
-    <!-- 自动批改开关 -->
+    <!-- 自动批改开关 + 语文历史记录 -->
     <div id="autoCheckWrap" class="auto-check-wrap">
-      <label class="toggle-switch">
-        <input type="checkbox" id="autoCheckToggle" checked>
-        <span class="toggle-slider"></span>
-      </label>
-      <span>自动批改</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoCheckToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span>自动批改</span>
+      </div>
+      <button id="chineseHistoryBtn" class="btn gray" style="padding: 6px 14px; font-size: 13px; border-radius: 6px; display: none;">历史记录</button>
     </div>
+    <div class="math-history" id="chineseDailyHistory"></div>
 
     <!-- 交互控制面板 -->
     <div class="row" id="wordControls">
@@ -1041,7 +1045,16 @@ document.addEventListener("DOMContentLoaded", function(){
 
   safeAddListener("unitSelect", "change", function() { updateLessonSelect(); filterWord(); });
   safeAddListener("lessonSelect", "change", filterWord);
-  safeAddListener("typeSelect", "change", renderWord);
+  safeAddListener("typeSelect", "change", function() {
+    const chineseHistoryBtn = document.getElementById('chineseHistoryBtn');
+    const chineseDailyHistory = document.getElementById('chineseDailyHistory');
+    const typeSelect = document.getElementById('typeSelect');
+    if (chineseHistoryBtn && typeSelect) {
+      chineseHistoryBtn.style.display = typeSelect.value === 'daily-chinese' ? 'inline-flex' : 'none';
+    }
+    if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
+    renderWord();
+  });
   safeAddListener("prevBtn", "click", prevWord);
   safeAddListener("nextBtn", "click", nextWord);
   safeAddListener("checkBtn", "click", checkAnswer);
@@ -1053,6 +1066,7 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("mathStartBtn", "click", startMath);
   safeAddListener("mathSubmitBtn", "click", submitMath);
   safeAddListener("mathHistoryBtn", "click", showMathHistory);
+  safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
 
   // 初始化自动批改开关
   const autoCheckToggle = document.getElementById("autoCheckToggle");
@@ -1553,6 +1567,32 @@ function showMathHistory() {
   });
 }
 
+function showChineseDailyHistory() {
+  const history = document.getElementById('chineseDailyHistory');
+  const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
+
+  if (!history) return;
+  if (history.classList.contains('show')) {
+    history.classList.remove('show');
+    history.innerHTML = '';
+    return;
+  }
+
+  history.classList.add('show');
+  if (records.length === 0) {
+    history.innerHTML = '<div class="math-history-item" style="color:#94a3b8;text-align:center;">暂无记录</div>';
+    return;
+  }
+
+  history.innerHTML = '<div style="font-weight:bold;color:#64748b;margin-bottom:6px;font-size:13px;">最近记录</div>';
+  records.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'math-history-item';
+    div.innerHTML = `<span>${r.date}</span><span><b>${r.correct}/${r.total}</b> 题 · ${formatTime(r.time)}</span>`;
+    history.appendChild(div);
+  });
+}
+
 // ========== 学科切换 ==========
 function switchSubject(subject) {
   const tabChinese = document.getElementById('tabChinese');
@@ -1569,6 +1609,10 @@ function switchSubject(subject) {
   const errW = document.querySelector('.error-widget');
   const rBanner = document.getElementById('reviewBanner');
   const autoCheckWrap = document.getElementById('autoCheckWrap');
+  const chineseHistoryBtn = document.getElementById('chineseHistoryBtn');
+  const chineseDailyHistory = document.getElementById('chineseDailyHistory');
+  const typeSelect = document.getElementById('typeSelect');
+  const isDailyChinese = typeSelect && typeSelect.value === 'daily-chinese';
 
   if (subject === 'math') {
     if (tabChinese) tabChinese.classList.remove('active');
@@ -1584,6 +1628,8 @@ function switchSubject(subject) {
     if (wordC) wordC.style.display = 'none';
     if (autoCheckWrap) autoCheckWrap.style.display = 'none';
     if (rBanner) rBanner.style.display = 'none';
+    if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
+    if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
     if (mathC) { mathC.style.display = 'flex'; renderMathMode(); }
   } else {
     if (tabChinese) tabChinese.classList.add('active');
@@ -1598,6 +1644,8 @@ function switchSubject(subject) {
     if (errW) errW.style.display = 'flex';
     if (wordC) wordC.style.display = 'flex';
     if (autoCheckWrap) autoCheckWrap.style.display = 'flex';
+    if (chineseHistoryBtn) chineseHistoryBtn.style.display = isDailyChinese ? 'inline-flex' : 'none';
+    if (!isDailyChinese && chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
     if (rBanner) rBanner.style.display = isReviewMode ? 'flex' : 'none';
     if (mathC) mathC.style.display = 'none';
     renderWord();
