@@ -1,0 +1,10 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="90" cy="90" r="85" fill="#1e40af"/>
+  <path d="M90 35 L105 75 L150 75 L115 100 L125 140 L90 120 L55 140 L65 100 L30 75 L75 75 Z" fill="#facc15"/>
+  <circle cx="75" cy="80" r="8" fill="#1e3a8a"/>
+  <circle cx="105" cy="80" r="8" fill="#1e3a8a"/>
+  <path d="M75 110 Q90 125 105 110" stroke="#1e3a8a" stroke-width="6" stroke-linecap="round"/>
+  <!-- 铅笔 -->
+  <rect x="115" y="85" width="12" height="35" rx="2" fill="#3b82f6" transform="rotate(35 120 100)"/>
+  <polygon points="125,115 130,125 118,128" fill="#ef4444"/>
+</svg>
