@@ -716,13 +716,42 @@
     .math-history-item:last-child {
       border-bottom: none;
     }
+
+    /* ========== 学科切换 Tab ========== */
+    .subject-tabs {
+      display: flex;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .tab-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      background: transparent;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #1e293b;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
 
 <header>
   <h1><span class="header-logo">学</span> 三年级学习助手</h1>
-  <div>
+  <div class="subject-tabs">
+    <button class="tab-btn active" id="tabChinese" onclick="switchSubject('chinese')">📖 语文</button>
+    <button class="tab-btn" id="tabMath" onclick="switchSubject('math')">🔢 数学</button>
+  </div>
+  <div id="selectorArea">
     <select id="unitSelect">
       <option value="all">全部单元</option>
       <option value="1">第一单元</option>
@@ -742,7 +771,6 @@
       <option value="pinyin">看字写拼音 (词语)</option>
       <option value="sentence-spell">看拼音填空 (句子)</option>
       <option value="sentence-pinyin">看字填拼音 (句子)</option>
-      <option value="math-daily">口算每日一练</option>
     </select>
   </div>
 </header>
@@ -974,17 +1002,7 @@ function updateLessonSelect() {
 function filterWord() {
   const uSelect = document.getElementById("unitSelect");
   const lSelect = document.getElementById("lessonSelect");
-  const typeSelect = document.getElementById("typeSelect");
-  if (!uSelect || !lSelect || !typeSelect) return;
-  
-  // 口算模式不走字词过滤逻辑
-  if (typeSelect.value === "math-daily") {
-    isReviewMode = false;
-    const rBanner = document.getElementById("reviewBanner");
-    if (rBanner) rBanner.style.display = "none";
-    renderWord();
-    return;
-  }
+  if (!uSelect || !lSelect) return;
   
   const u = uSelect.value; const l = lSelect.value;
   
@@ -1014,20 +1032,6 @@ function renderWord(){
   const typeSelect = document.getElementById("typeSelect");
   if (!typeSelect) return;
   const type = typeSelect.value;
-
-  // 口算模式
-  if (type === "math-daily") {
-    if (pyShow) pyShow.style.display = "none";
-    if (sShow) sShow.style.display = "none";
-    if (charC) { charC.innerHTML = ""; charC.style.display = "none"; }
-    if (corrC) corrC.style.display = "none";
-    if (pyKb) pyKb.style.display = "none";
-    if (tip) tip.style.display = "none";
-    if (errW) errW.style.display = "none";
-    if (wordC) wordC.style.display = "none";
-    if (mathC) { mathC.style.display = "flex"; renderMathMode(); }
-    return;
-  }
 
   // 字词模式：隐藏口算，显示字词
   if (mathC) mathC.style.display = "none";
@@ -1415,6 +1419,54 @@ function showMathHistory() {
     div.innerHTML = `<span>${r.date}</span><span><b>${r.correct}/${r.total}</b> 题 · ${formatTime(r.time)}</span>`;
     history.appendChild(div);
   });
+}
+
+// ========== 学科切换 ==========
+function switchSubject(subject) {
+  const tabChinese = document.getElementById('tabChinese');
+  const tabMath = document.getElementById('tabMath');
+  const selectorArea = document.getElementById('selectorArea');
+  const mathC = document.getElementById('mathContainer');
+  const wordC = document.getElementById('wordControls');
+  const tip = document.getElementById('tip');
+  const pyShow = document.getElementById('pinyinShow');
+  const sShow = document.getElementById('sentenceShow');
+  const charC = document.getElementById('charContainer');
+  const corrC = document.getElementById('correctGrids');
+  const pyKb = document.getElementById('pinyinKeyboard');
+  const errW = document.querySelector('.error-widget');
+  const rBanner = document.getElementById('reviewBanner');
+
+  if (subject === 'math') {
+    if (tabChinese) tabChinese.classList.remove('active');
+    if (tabMath) tabMath.classList.add('active');
+    if (selectorArea) selectorArea.style.display = 'none';
+    if (tip) tip.style.display = 'none';
+    if (pyShow) pyShow.style.display = 'none';
+    if (sShow) sShow.style.display = 'none';
+    if (charC) charC.style.display = 'none';
+    if (corrC) corrC.style.display = 'none';
+    if (pyKb) pyKb.style.display = 'none';
+    if (errW) errW.style.display = 'none';
+    if (wordC) wordC.style.display = 'none';
+    if (rBanner) rBanner.style.display = 'none';
+    if (mathC) { mathC.style.display = 'flex'; renderMathMode(); }
+  } else {
+    if (tabChinese) tabChinese.classList.add('active');
+    if (tabMath) tabMath.classList.remove('active');
+    if (selectorArea) selectorArea.style.display = 'block';
+    if (tip) tip.style.display = 'block';
+    if (pyShow) pyShow.style.display = 'block';
+    if (sShow) sShow.style.display = 'none';
+    if (charC) charC.style.display = 'flex';
+    if (corrC) corrC.style.display = 'flex';
+    if (pyKb) pyKb.style.display = 'none';
+    if (errW) errW.style.display = 'flex';
+    if (wordC) wordC.style.display = 'flex';
+    if (rBanner) rBanner.style.display = isReviewMode ? 'flex' : 'none';
+    if (mathC) mathC.style.display = 'none';
+    renderWord();
+  }
 }
 </script>
 </body>
