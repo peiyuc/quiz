@@ -829,11 +829,11 @@
       <option value="all">全部课文</option>
     </select>
     <select id="typeSelect">
+      <option value="daily-chinese" selected>语文每日一练</option>
       <option value="spell">看拼音写字 (词语)</option>
       <option value="pinyin">看字写拼音 (词语)</option>
       <option value="sentence-spell">看拼音填空 (句子)</option>
       <option value="sentence-pinyin">看字填拼音 (句子)</option>
-      <option value="daily-chinese">语文每日一练</option>
     </select>
   </div>
 </header>
@@ -1069,7 +1069,7 @@ document.addEventListener("DOMContentLoaded", function(){
     e.preventDefault(); // 拦截、锁定主屏幕的晃动和滚动
   }, { passive: false });
 
-  updateLessonSelect(); updateErrCount(); renderWord(); renderErrList();
+  updateLessonSelect(); filterWord(); updateErrCount(); renderErrList();
 });
 
 function updateLessonSelect() {
