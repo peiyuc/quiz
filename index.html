@@ -458,6 +458,12 @@
       pointer-events: auto;
       -webkit-touch-callout: none;
     }
+    /* Apple Pencil 全面支持 */
+    button, select, input, label, .tab-btn, .key-btn, .del-err-btn, .toggle-slider {
+      touch-action: manipulation;
+      pointer-events: auto;
+      -webkit-touch-callout: none;
+    }
     .btn.blue {
       background: #2563eb;
     }
@@ -827,6 +833,7 @@
       <option value="pinyin">看字写拼音 (词语)</option>
       <option value="sentence-spell">看拼音填空 (句子)</option>
       <option value="sentence-pinyin">看字填拼音 (句子)</option>
+      <option value="daily-chinese">语文每日一练</option>
     </select>
   </div>
 </header>
@@ -1014,6 +1021,9 @@ let errorList = JSON.parse(localStorage.getItem("threeErrWords")) || [];
 let activeInput = null;
 let autoNextTimeout = null; // 自动跳转延时锁
 let isReviewMode = false;   // 错题复习模式标记
+let dailyChineseQuestions = []; // 语文每日一练题目
+let dailyChineseStartTime = null; // 语文每日一练开始时间
+let dailyChineseResults = []; // 语文每日一练每题结果
 
 document.addEventListener("DOMContentLoaded", function(){
   // 安全事件绑定函数：当部分 DOM 元素因延迟加载或特定渲染时返回 null 时，不中断 JavaScript 编译
@@ -1074,10 +1084,31 @@ function updateLessonSelect() {
   } else if (lessonMap[u]) { lessonMap[u].forEach(l => { const opt = document.createElement("option"); opt.value = l.id; opt.innerText = l.name; lessonSelect.appendChild(opt); }); }
 }
 
+function generateDailyChinese() {
+  const seed = getTodaySeed();
+  const shuffled = [...wordLib].sort((a, b) => seededRandom(seed + a.word.charCodeAt(0)) - seededRandom(seed + b.word.charCodeAt(0)));
+  return shuffled.slice(0, 10);
+}
+
 function filterWord() {
   const uSelect = document.getElementById("unitSelect");
   const lSelect = document.getElementById("lessonSelect");
-  if (!uSelect || !lSelect) return;
+  const typeSelect = document.getElementById("typeSelect");
+  if (!uSelect || !lSelect || !typeSelect) return;
+  
+  // 语文每日一练模式
+  if (typeSelect.value === "daily-chinese") {
+    isReviewMode = false;
+    const rBanner = document.getElementById("reviewBanner");
+    if (rBanner) rBanner.style.display = "none";
+    dailyChineseQuestions = generateDailyChinese();
+    filterWords = dailyChineseQuestions;
+    currentIdx = 0;
+    dailyChineseStartTime = Date.now();
+    dailyChineseResults = [];
+    renderWord();
+    return;
+  }
   
   const u = uSelect.value; const l = lSelect.value;
   
@@ -1148,6 +1179,11 @@ function renderWord(){
     pyShow.style.display = "none"; document.getElementById("tip").innerText = "请在四线三格内写出句中蓝色生字的正确拼音"; if (pyKb) pyKb.style.display = "flex"; corrC.style.display = "none";
     sShow.style.display = "block"; const highlightHtml = `<span class="sentence-highlight">${now.target}</span>`; sShow.innerHTML = now.sentence.replace(`[${now.target}]`, highlightHtml);
     renderFourLines(now.target, now.targetPinyin);
+  } else if (type === "daily-chinese") {
+    sShow.style.display = "none"; pyShow.style.display = "block"; pyShow.innerText = now.pinyin; document.getElementById("tip").innerText = `语文每日一练 · 第 ${currentIdx + 1} / 10 题`; if (pyKb) pyKb.style.display = "none";
+    corrC.style.display = "flex"; corrC.innerHTML = "";
+    for(let i=0; i < now.word.length; i++){ const sBox = document.createElement("div"); sBox.className = "small-box"; sBox.innerText = ""; sBox.id = `sbox-${i}`; corrC.appendChild(sBox); }
+    renderBigBoxes(now.word);
   }
 }
 
@@ -1159,8 +1195,8 @@ function checkAndAutoSubmit() {
   const typeSelect = document.getElementById("typeSelect");
   if (!typeSelect) return;
   const type = typeSelect.value;
-  // 仅在“看拼音写字 (词语)” 与 “看拼音填空 (句子)” 模式下进行字满自动跳转
-  if (type !== "spell" && type !== "sentence-spell") return;
+  // 仅在“看拼音写字 (词语)”、“看拼音填空 (句子)”与“语文每日一练”模式下进行字满自动跳转
+  if (type !== "spell" && type !== "sentence-spell" && type !== "daily-chinese") return;
 
   const inputs = document.querySelectorAll("#charContainer .input-word");
   let allFilled = true;
@@ -1242,8 +1278,8 @@ function nextWord(){ if(currentIdx<filterWords.length-1){ currentIdx++; renderWo
 function checkAnswer(){
   if(filterWords.length === 0) return;
   const now = filterWords[currentIdx]; const type = document.getElementById("typeSelect").value; let hasWrong = false; let userInputs = [];
-  if (type === "spell" || type === "sentence-spell") {
-    const targetWord = (type === "spell") ? now.word : now.target; const boxes = document.querySelectorAll("#charContainer .box");
+  if (type === "spell" || type === "sentence-spell" || type === "daily-chinese") {
+    const targetWord = (type === "spell" || type === "daily-chinese") ? now.word : now.target; const boxes = document.querySelectorAll("#charContainer .box");
     boxes.forEach((box, i) => {
       const input = box.querySelector(".input-word"); const userAns = input.value.trim(); const rightAns = input.dataset.answer.trim();
       userInputs.push(input.value.trim() || "空");
@@ -1253,6 +1289,21 @@ function checkAnswer(){
       const sBox = document.getElementById(`sbox-${i}`);
       if (sBox) { sBox.innerText = char; const input = boxes[i]?.querySelector(".input-word"); sBox.style.color = (input && input.value.trim() === char) ? "#1e293b" : "#dc2626"; }
     });
+    // 语文每日一练记录结果
+    if (type === "daily-chinese") {
+      dailyChineseResults[currentIdx] = !hasWrong;
+      if (currentIdx === 9) {
+        // 最后一题，显示总成绩
+        const correct = dailyChineseResults.filter(Boolean).length;
+        const elapsed = Math.floor((Date.now() - dailyChineseStartTime) / 1000);
+        const tip = document.getElementById("tip");
+        if (tip) tip.innerText = `🎉 完成！答对 ${correct}/10 题，用时 ${formatTime(elapsed)}`;
+        // 保存记录
+        const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
+        records.unshift({ date: new Date().toISOString().slice(0, 10), correct, total: 10, time: elapsed });
+        localStorage.setItem('chineseDailyRecords', JSON.stringify(records.slice(0, 30)));
+      }
+    }
   } else {
     document.querySelectorAll(".pinyin-column").forEach((column, i) => {
       const input = column.querySelector(".pinyin-input"); const answerText = column.querySelector(".correct-text"); const answerBox = column.querySelector(".answer-four-line"); const inputBox = column.querySelector(".input-four-line");
@@ -1262,8 +1313,8 @@ function checkAnswer(){
       else { inputBox.style.borderColor = "#ef4444"; inputBox.style.backgroundColor = "#fef2f2"; answerText.className = "correct-text color-wrong"; hasWrong = true; inputBox.style.animation = "shake 0.4s ease-in-out"; setTimeout(() => { inputBox.style.animation = ""; }, 400); }
     });
   }
-  const userAttemptStr = (type === "spell" || type === "sentence-spell") ? userInputs.join("") : userInputs.join(" ");
-  if(hasWrong) { autoAddErr(now, userAttemptStr); }
+  const userAttemptStr = (type === "spell" || type === "sentence-spell" || type === "daily-chinese") ? userInputs.join("") : userInputs.join(" ");
+  if(hasWrong && type !== "daily-chinese") { autoAddErr(now, userAttemptStr); }
 }
 function autoAddErr(now, wrongAns) {
   let find = errorList.find(item => item.word === now.word);
