@@ -809,7 +809,7 @@
 <body>
 
 <header>
-  <h1><img src="logo.jpg" alt="logo" style="height:28px;width:auto;border-radius:6px;vertical-align:middle;margin-right:6px;">小学天天练</h1>
+  <h1><img src="favicon.svg" alt="logo" style="height:28px;width:28px;border-radius:50%;vertical-align:middle;margin-right:6px;">小学天天练</h1>
   <select id="gradeSelect" disabled>
     <option value="3">三年级</option>
   </select>
@@ -1336,19 +1336,19 @@ function checkAnswer(){
     });
   }
   const userAttemptStr = (type === "spell" || type === "sentence-spell" || type === "daily-chinese") ? userInputs.join("") : userInputs.join(" ");
-  if(hasWrong && type !== "daily-chinese") { autoAddErr(now, userAttemptStr); }
+  if(hasWrong) { autoAddErr(now, userAttemptStr, "chinese"); }
 }
-function autoAddErr(now, wrongAns) {
-  let find = errorList.find(item => item.word === now.word);
-  if(find){ find.errCount++; find.lastWrong = wrongAns; }else{ errorList.push({...now, errCount: 1, lastWrong: wrongAns}); }
+function autoAddErr(now, wrongAns, subject = "chinese") {
+  let find = errorList.find(item => item.word === now.word && (item.subject || "chinese") === subject);
+  if(find){ find.errCount++; find.lastWrong = wrongAns; }else{ errorList.push({...now, subject, errCount: 1, lastWrong: wrongAns}); }
   localStorage.setItem("threeErrWords", JSON.stringify(errorList)); updateErrCount(); renderErrList();
 }
 function manualAddErr(){
   if(filterWords.length === 0) return; const now = filterWords[currentIdx]; let userInputs = []; const type = document.getElementById("typeSelect").value;
   document.querySelectorAll(".input-word, .pinyin-input").forEach(input => { userInputs.push(input.value.trim() || "空"); });
-  autoAddErr(now, (type === "spell" || type === "sentence-spell") ? userInputs.join("") : userInputs.join(" "));
+  autoAddErr(now, (type === "spell" || type === "sentence-spell" || type === "daily-chinese") ? userInputs.join("") : userInputs.join(" "), "chinese");
 }
-function removeErr(wordText) { errorList = errorList.filter(item => item.word !== wordText); localStorage.setItem("threeErrWords", JSON.stringify(errorList)); updateErrCount(); renderErrList(); }
+function removeErr(wordText, subject = "chinese") { errorList = errorList.filter(item => !(item.word === wordText && (item.subject || "chinese") === subject)); localStorage.setItem("threeErrWords", JSON.stringify(errorList)); updateErrCount(); renderErrList(); }
 function updateErrCount(){ 
   const errCount = document.getElementById("errCount");
   if (errCount) errCount.innerText = errorList.length; 
@@ -1367,14 +1367,15 @@ function renderErrList(){
   listDom.innerHTML = ""; if(errorList.length===0){ listDom.innerHTML = "<div class='err-item' style='color:#94a3b8; text-align:center;'>暂无错题记录，你太棒了！</div>"; return; }
   errorList.forEach(item=>{
     const div = document.createElement("div"); div.className = "err-item"; const topRow = document.createElement("div"); topRow.className = "err-row-top";
-    topRow.innerHTML = `<span class="err-info"><span class="err-word">${item.word}</span> <span style="color:#64748b;">[${item.pinyin}]</span> <span class="err-badge">单元${item.unit}</span></span><div style="display:flex;align-items:center;gap:15px;"><span style="color:#ef4444;font-size:13px;">累计错 ${item.errCount} 次</span><button class="del-err-btn" onclick="removeErr('${item.word}')">移出</button></div>`;
+    const subjectLabel = (item.subject || 'chinese') === 'math' ? '数学' : `单元${item.unit}`;
+    topRow.innerHTML = `<span class="err-info"><span class="err-word">${item.word}</span> <span style="color:#64748b;">[${item.pinyin || ''}]</span> <span class="err-badge">${subjectLabel}</span></span><div style="display:flex;align-items:center;gap:15px;"><span style="color:#ef4444;font-size:13px;">累计错 ${item.errCount} 次</span><button class="del-err-btn" onclick="removeErr('${item.word}', '${item.subject || 'chinese'}')">移出</button></div>`;
     div.appendChild(topRow); div.innerHTML += `<div style="font-size:12px;color:#64748b;margin-top:2px;">上次错写为：<span style="color:#ef4444;font-weight:bold;background-color:#fff1f2;padding:1px 6px;border-radius:4px;border:1px solid #ffe4e6;">${item.lastWrong || "无输入"}</span></div>`;
     listDom.appendChild(div);
   });
 }
 function startReview(){
   if(errorList.length===0) return; const modeEl = document.querySelector("input[name='sortMode']:checked"); if (!modeEl) return;
-  const mode = modeEl.value; let arr = [...errorList];
+  const mode = modeEl.value; let arr = [...errorList].filter(item => (item.subject || "chinese") === "chinese");
   if(mode==="freq"){ arr.sort((a,b)=>b.errCount - a.errCount); }else if(mode==="lesson"){ arr.sort((a,b)=>parseInt(a.unit) - parseInt(b.unit)); }else{ arr.sort(()=>Math.random()-0.5); }
   
   // 激活错题复习模式
@@ -1523,6 +1524,17 @@ function submitMath() {
     } else {
       div.classList.add('wrong');
       input.disabled = true;
+      // 数学错题加入通用错题本
+      const mathErr = {
+        word: item.q.replace('=', '').trim(),
+        pinyin: String(item.a),
+        unit: "math",
+        lessonId: "math",
+        sentence: "",
+        target: "",
+        targetPinyin: ""
+      };
+      autoAddErr(mathErr, String(val || "空"), "math");
     }
   });
 
