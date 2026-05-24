@@ -808,12 +808,15 @@
 <body>
 
 <header>
-  <h1><span class="header-logo">学</span> 三年级学习助手</h1>
+  <h1><span class="header-logo">学</span> 学习助手</h1>
   <div class="subject-tabs">
     <button class="tab-btn active" id="tabChinese" onclick="switchSubject('chinese')">📖 语文</button>
     <button class="tab-btn" id="tabMath" onclick="switchSubject('math')">🔢 数学</button>
   </div>
   <div id="selectorArea">
+    <select id="gradeSelect" disabled>
+      <option value="3">三年级</option>
+    </select>
     <select id="unitSelect">
       <option value="all">全部单元</option>
       <option value="1">第一单元</option>
