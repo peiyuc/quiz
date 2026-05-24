@@ -49,6 +49,7 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       border-bottom: 2px solid #e2e8f0;
       z-index: 10;
+      min-height: 64px;
     }
     h1 {
       font-size: 18px;
@@ -78,7 +79,7 @@
     .main {
       flex: 1;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 15px;
       overflow: hidden; /* 防止主容器出现额外滚动条 */
@@ -1440,7 +1441,7 @@ function switchSubject(subject) {
   if (subject === 'math') {
     if (tabChinese) tabChinese.classList.remove('active');
     if (tabMath) tabMath.classList.add('active');
-    if (selectorArea) selectorArea.style.display = 'none';
+    if (selectorArea) selectorArea.style.visibility = 'hidden';
     if (tip) tip.style.display = 'none';
     if (pyShow) pyShow.style.display = 'none';
     if (sShow) sShow.style.display = 'none';
@@ -1454,7 +1455,7 @@ function switchSubject(subject) {
   } else {
     if (tabChinese) tabChinese.classList.add('active');
     if (tabMath) tabMath.classList.remove('active');
-    if (selectorArea) selectorArea.style.display = 'block';
+    if (selectorArea) selectorArea.style.visibility = 'visible';
     if (tip) tip.style.display = 'block';
     if (pyShow) pyShow.style.display = 'block';
     if (sShow) sShow.style.display = 'none';
