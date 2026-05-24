@@ -572,6 +572,24 @@
       border-radius: 4px;
       border: 1px solid #fee2e2;
     }
+    .filter-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      pointer-events: auto;
+      -webkit-touch-callout: none;
+    }
+    .filter-btn.active {
+      background: #3b82f6 !important;
+      color: white !important;
+    }
     
     .tip-text {
       text-align: center;
@@ -1005,6 +1023,11 @@
       <label style="cursor: pointer; font-size:14px;"><input type="radio" name="sortMode" value="random"> 随机练习</label>
       <button id="startReview" class="btn green" style="margin-left:12px; padding: 6px 12px; font-size: 13px; border-radius:6px;">开始复习</button>
     </div>
+
+    <div id="subjectFilter" style="display:flex;gap:0;margin:8px 0 12px;border-radius:6px;overflow:hidden;border:1px solid #e2e8f0;">
+      <button class="filter-btn" data-subject="chinese" onclick="switchErrSubjectFilter('chinese')">语文 <span id="chineseErrCount">(0)</span></button>
+      <button class="filter-btn" data-subject="math" onclick="switchErrSubjectFilter('math')">数学 <span id="mathErrCount">(0)</span></button>
+    </div>
     
     <div id="errList"></div>
   </div>
@@ -1029,6 +1052,7 @@ let errorList = JSON.parse(localStorage.getItem("threeErrWords")) || [];
 let activeInput = null;
 let autoNextTimeout = null; // 自动跳转延时锁
 let isReviewMode = false;   // 错题复习模式标记
+let currentErrFilter = 'chinese'; // 错题本当前筛选学科
 let dailyChineseQuestions = []; // 语文每日一练题目
 let dailyChineseStartTime = null; // 语文每日一练开始时间
 let dailyChineseResults = []; // 语文每日一练每题结果
@@ -1351,32 +1375,81 @@ function manualAddErr(){
 function removeErr(wordText, subject = "chinese") { errorList = errorList.filter(item => !(item.word === wordText && (item.subject || "chinese") === subject)); localStorage.setItem("threeErrWords", JSON.stringify(errorList)); updateErrCount(); renderErrList(); }
 function updateErrCount(){ 
   const errCount = document.getElementById("errCount");
-  if (errCount) errCount.innerText = errorList.length; 
+  if (!errCount) return;
+  const chineseCount = errorList.filter(i => (i.subject || 'chinese') === 'chinese').length;
+  const mathCount = errorList.filter(i => i.subject === 'math').length;
+  if (chineseCount > 0 && mathCount > 0) {
+    errCount.innerText = `语文${chineseCount}+数学${mathCount}`;
+  } else {
+    errCount.innerText = errorList.length;
+  }
 }
 function showErrModal(){ 
   const errModal = document.getElementById("errModal");
-  if (errModal) errModal.style.display = "flex"; 
-  renderErrList(); 
+  if (errModal) errModal.style.display = "flex";
+  // 根据当前学科默认选中对应筛选标签
+  const isMathActive = document.getElementById('tabMath') && document.getElementById('tabMath').classList.contains('active');
+  switchErrSubjectFilter(isMathActive ? 'math' : 'chinese');
 }
 function hideErrModal(){ 
   const errModal = document.getElementById("errModal");
   if (errModal) errModal.style.display = "none"; 
 }
+
+function switchErrSubjectFilter(subject) {
+  currentErrFilter = subject;
+  document.querySelectorAll('#subjectFilter .filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.subject === subject);
+  });
+  renderErrList();
+}
+
 function renderErrList(){
   const listDom = document.getElementById("errList"); if (!listDom) return;
-  listDom.innerHTML = ""; if(errorList.length===0){ listDom.innerHTML = "<div class='err-item' style='color:#94a3b8; text-align:center;'>暂无错题记录，你太棒了！</div>"; return; }
-  errorList.forEach(item=>{
+  listDom.innerHTML = "";
+  
+  const filtered = errorList.filter(item => (item.subject || 'chinese') === currentErrFilter);
+  
+  if(filtered.length === 0){ 
+    listDom.innerHTML = `<div class='err-item' style='color:#94a3b8; text-align:center;'>暂无${currentErrFilter === 'math' ? '数学' : '语文'}错题记录，你太棒了！</div>`; 
+    return; 
+  }
+  
+  filtered.forEach(item => {
     const div = document.createElement("div"); div.className = "err-item"; const topRow = document.createElement("div"); topRow.className = "err-row-top";
-    const subjectLabel = (item.subject || 'chinese') === 'math' ? '数学' : `单元${item.unit}`;
-    topRow.innerHTML = `<span class="err-info"><span class="err-word">${item.word}</span> <span style="color:#64748b;">[${item.pinyin || ''}]</span> <span class="err-badge">${subjectLabel}</span></span><div style="display:flex;align-items:center;gap:15px;"><span style="color:#ef4444;font-size:13px;">累计错 ${item.errCount} 次</span><button class="del-err-btn" onclick="removeErr('${item.word}', '${item.subject || 'chinese'}')">移出</button></div>`;
+    const isMath = (item.subject || 'chinese') === 'math';
+    const subjectLabel = isMath ? '数学' : `单元${item.unit}`;
+    const detailLabel = isMath ? `答案: ${item.pinyin || ''}` : (item.pinyin || '');
+    topRow.innerHTML = `<span class="err-info"><span class="err-word">${item.word}</span> <span style="color:#64748b;">[${detailLabel}]</span> <span class="err-badge">${subjectLabel}</span></span><div style="display:flex;align-items:center;gap:15px;"><span style="color:#ef4444;font-size:13px;">累计错 ${item.errCount} 次</span><button class="del-err-btn" onclick="removeErr('${item.word}', '${item.subject || 'chinese'}')">移出</button></div>`;
     div.appendChild(topRow); div.innerHTML += `<div style="font-size:12px;color:#64748b;margin-top:2px;">上次错写为：<span style="color:#ef4444;font-weight:bold;background-color:#fff1f2;padding:1px 6px;border-radius:4px;border:1px solid #ffe4e6;">${item.lastWrong || "无输入"}</span></div>`;
     listDom.appendChild(div);
   });
+  
+  // 更新各学科错题计数
+  const chineseCount = errorList.filter(i => (i.subject || 'chinese') === 'chinese').length;
+  const mathCount = errorList.filter(i => i.subject === 'math').length;
+  const chineseCountEl = document.getElementById('chineseErrCount');
+  const mathCountEl = document.getElementById('mathErrCount');
+  if (chineseCountEl) chineseCountEl.innerText = `(${chineseCount})`;
+  if (mathCountEl) mathCountEl.innerText = `(${mathCount})`;
 }
+
 function startReview(){
-  if(errorList.length===0) return; const modeEl = document.querySelector("input[name='sortMode']:checked"); if (!modeEl) return;
-  const mode = modeEl.value; let arr = [...errorList].filter(item => (item.subject || "chinese") === "chinese");
-  if(mode==="freq"){ arr.sort((a,b)=>b.errCount - a.errCount); }else if(mode==="lesson"){ arr.sort((a,b)=>parseInt(a.unit) - parseInt(b.unit)); }else{ arr.sort(()=>Math.random()-0.5); }
+  const modeEl = document.querySelector("input[name='sortMode']:checked"); if (!modeEl) return;
+  let arr = [...errorList].filter(item => (item.subject || "chinese") === currentErrFilter);
+  if(arr.length === 0) return;
+  
+  const mode = modeEl.value;
+  if(mode==="freq"){ arr.sort((a,b)=>b.errCount - a.errCount); }else if(mode==="lesson"){ arr.sort((a,b)=>parseInt(a.unit || 0) - parseInt(b.unit || 0)); }else{ arr.sort(()=>Math.random()-0.5); }
+  
+  // 先切换到对应学科
+  switchSubject(currentErrFilter);
+  
+  // 数学错题暂不支持复习模式
+  if (currentErrFilter === 'math') {
+    alert('数学错题复习功能正在开发中，敬请期待！');
+    return;
+  }
   
   // 激活错题复习模式
   isReviewMode = true;
