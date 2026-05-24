@@ -1152,6 +1152,8 @@ function renderWord(){
   const wordC = document.getElementById("wordControls");
   const tip = document.getElementById("tip");
   const errW = document.querySelector(".error-widget");
+  const chineseHistoryBtn = document.getElementById('chineseHistoryBtn');
+  const chineseDailyHistory = document.getElementById('chineseDailyHistory');
   const typeSelect = document.getElementById("typeSelect");
   if (!typeSelect) return;
   const type = typeSelect.value;
@@ -1162,6 +1164,8 @@ function renderWord(){
   if (tip) tip.style.display = "block";
   if (errW) errW.style.display = "flex";
   if (charC) charC.style.display = "flex";
+  if (chineseHistoryBtn) chineseHistoryBtn.style.display = type === 'daily-chinese' ? 'inline-flex' : 'none';
+  if (type !== 'daily-chinese' && chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
 
   if(filterWords.length===0){ 
     if (pyShow) {
