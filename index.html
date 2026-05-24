@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>三年级下册字词练字 - 26春生字词句专项版</title>
+  <title>三年级学习助手 - 字词+口算每日一练</title>
   <style>
     * {
       margin: 0;
@@ -595,12 +595,133 @@
     .del-err-btn:hover {
       text-decoration: underline;
     }
+
+    /* ========== 口算每日一练 ========== */
+    .math-container {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .math-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f0f9ff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #bae6fd;
+    }
+    .math-date {
+      font-size: 16px;
+      font-weight: bold;
+      color: #0369a1;
+    }
+    .math-timer {
+      font-size: 20px;
+      font-weight: bold;
+      color: #b91c1c;
+      font-family: monospace;
+    }
+    .math-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-height: 50vh;
+      overflow-y: auto;
+    }
+    @media (max-width: 600px) {
+      .math-list { grid-template-columns: 1fr; }
+    }
+    .math-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 18px;
+    }
+    .math-item .math-q {
+      font-weight: bold;
+      color: #1e293b;
+      min-width: 120px;
+    }
+    .math-item .math-input {
+      width: 70px;
+      height: 36px;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      outline: none;
+      color: #1e293b;
+    }
+    .math-item .math-input:focus {
+      border-color: #3b82f6;
+    }
+    .math-item.correct .math-input {
+      border-color: #10b981;
+      background: #ecfdf5;
+    }
+    .math-item.wrong .math-input {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+    .math-item .math-ans {
+      font-size: 14px;
+      color: #ef4444;
+      margin-left: 4px;
+      display: none;
+    }
+    .math-item.wrong .math-ans {
+      display: inline;
+    }
+    .math-result {
+      display: none;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .math-result.show {
+      display: block;
+    }
+    .math-result h3 {
+      color: #15803d;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .math-history {
+      display: none;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .math-history.show {
+      display: block;
+    }
+    .math-history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+    .math-history-item:last-child {
+      border-bottom: none;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="header-logo">练</span> 三年级下册字词大格子练字</h1>
+  <h1><span class="header-logo">学</span> 三年级学习助手</h1>
   <div>
     <select id="unitSelect">
       <option value="all">全部单元</option>
@@ -621,6 +742,7 @@
       <option value="pinyin">看字写拼音 (词语)</option>
       <option value="sentence-spell">看拼音填空 (句子)</option>
       <option value="sentence-pinyin">看字填拼音 (句子)</option>
+      <option value="math-daily">口算每日一练</option>
     </select>
   </div>
 </header>
@@ -731,8 +853,27 @@
       <button id="openErrBtn" class="btn blue" style="padding: 6px 14px; font-size: 13px; border-radius: 6px;">打开错题本</button>
     </div>
 
+    <!-- 口算每日一练 -->
+    <div id="mathContainer" class="math-container">
+      <div class="math-header">
+        <span class="math-date" id="mathDate">口算每日一练</span>
+        <span class="math-timer" id="mathTimer">00:00</span>
+      </div>
+      <div class="math-list" id="mathList"></div>
+      <div class="math-result" id="mathResult">
+        <h3>🎉 完成！</h3>
+        <p id="mathScoreText"></p>
+      </div>
+      <div class="row" id="mathControls">
+        <button id="mathStartBtn" class="btn green" style="flex:1">开始练习</button>
+        <button id="mathSubmitBtn" class="btn blue" style="flex:1;display:none">交卷</button>
+        <button id="mathHistoryBtn" class="btn gray" style="flex:1">历史记录</button>
+      </div>
+      <div class="math-history" id="mathHistory"></div>
+    </div>
+
     <!-- 交互控制面板 -->
-    <div class="row">
+    <div class="row" id="wordControls">
       <button id="prevBtn" class="btn gray" style="flex:1">上一题</button>
       <button id="checkBtn" class="btn green" style="flex:1.5">核对答案</button>
       <button id="addErrBtn" class="btn red" style="flex:1">加入错题</button>
@@ -803,6 +944,9 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("closeModal", "click", hideErrModal);
   safeAddListener("startReview", "click", startReview);
   safeAddListener("exitReviewBtn", "click", exitReview);
+  safeAddListener("mathStartBtn", "click", startMath);
+  safeAddListener("mathSubmitBtn", "click", submitMath);
+  safeAddListener("mathHistoryBtn", "click", showMathHistory);
 
   // iPad防晃终极拦截器：如果滑动的不是错题弹窗里的列表，则一律阻止页面整体滚动
   document.addEventListener('touchmove', function(e) {
@@ -830,7 +974,18 @@ function updateLessonSelect() {
 function filterWord() {
   const uSelect = document.getElementById("unitSelect");
   const lSelect = document.getElementById("lessonSelect");
-  if (!uSelect || !lSelect) return;
+  const typeSelect = document.getElementById("typeSelect");
+  if (!uSelect || !lSelect || !typeSelect) return;
+  
+  // 口算模式不走字词过滤逻辑
+  if (typeSelect.value === "math-daily") {
+    isReviewMode = false;
+    const rBanner = document.getElementById("reviewBanner");
+    if (rBanner) rBanner.style.display = "none";
+    renderWord();
+    return;
+  }
+  
   const u = uSelect.value; const l = lSelect.value;
   
   // 任何手动的下拉筛选都会使系统自动退出复习模式
@@ -852,6 +1007,34 @@ function renderWord(){
   const charC = document.getElementById("charContainer");
   const corrC = document.getElementById("correctGrids");
   const pyKb = document.getElementById("pinyinKeyboard");
+  const mathC = document.getElementById("mathContainer");
+  const wordC = document.getElementById("wordControls");
+  const tip = document.getElementById("tip");
+  const errW = document.querySelector(".error-widget");
+  const typeSelect = document.getElementById("typeSelect");
+  if (!typeSelect) return;
+  const type = typeSelect.value;
+
+  // 口算模式
+  if (type === "math-daily") {
+    if (pyShow) pyShow.style.display = "none";
+    if (sShow) sShow.style.display = "none";
+    if (charC) { charC.innerHTML = ""; charC.style.display = "none"; }
+    if (corrC) corrC.style.display = "none";
+    if (pyKb) pyKb.style.display = "none";
+    if (tip) tip.style.display = "none";
+    if (errW) errW.style.display = "none";
+    if (wordC) wordC.style.display = "none";
+    if (mathC) { mathC.style.display = "flex"; renderMathMode(); }
+    return;
+  }
+
+  // 字词模式：隐藏口算，显示字词
+  if (mathC) mathC.style.display = "none";
+  if (wordC) wordC.style.display = "flex";
+  if (tip) tip.style.display = "block";
+  if (errW) errW.style.display = "flex";
+  if (charC) charC.style.display = "flex";
 
   if(filterWords.length===0){ 
     if (pyShow) {
@@ -865,10 +1048,8 @@ function renderWord(){
     return; 
   }
   const now = filterWords[currentIdx]; 
-  const typeSelect = document.getElementById("typeSelect");
-  if (!typeSelect || !charC || !corrC || !sShow || !pyShow) return;
+  if (!charC || !corrC || !sShow || !pyShow) return;
   
-  const type = typeSelect.value;
   charC.innerHTML = "";
   if (type === "spell") {
     sShow.style.display = "none"; pyShow.style.display = "block"; pyShow.innerText = now.pinyin; document.getElementById("tip").innerText = "请在格子里写字"; if (pyKb) pyKb.style.display = "none";
@@ -1054,6 +1235,186 @@ function exitReview() {
   if (rBanner) rBanner.style.display = "none";
   // 重新加载标准过滤下的题目列表
   filterWord();
+}
+
+// ========== 口算每日一练 ==========
+const MATH_COUNT = 20;
+let mathQuestions = [];
+let mathStartTime = null;
+let mathTimerInterval = null;
+
+function seededRandom(seed) {
+  let x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+function getTodaySeed() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+
+function randInt(min, max, seed) {
+  return Math.floor(seededRandom(seed) * (max - min + 1)) + min;
+}
+
+function generateDailyMath() {
+  const seedBase = getTodaySeed();
+  const questions = [];
+  // 5道加法
+  for (let i = 0; i < 5; i++) {
+    let a = randInt(10, 99, seedBase + i * 10);
+    let b = randInt(10, 99, seedBase + i * 10 + 1);
+    questions.push({ q: `${a} + ${b} =`, a: a + b, type: 'add' });
+  }
+  // 5道减法
+  for (let i = 0; i < 5; i++) {
+    let a = randInt(20, 99, seedBase + 50 + i * 10);
+    let b = randInt(10, a - 1, seedBase + 50 + i * 10 + 1);
+    questions.push({ q: `${a} − ${b} =`, a: a - b, type: 'sub' });
+  }
+  // 5道乘法
+  for (let i = 0; i < 5; i++) {
+    let a = randInt(2, 9, seedBase + 100 + i * 10);
+    let b = randInt(2, 9, seedBase + 100 + i * 10 + 1);
+    questions.push({ q: `${a} × ${b} =`, a: a * b, type: 'mul' });
+  }
+  // 5道除法
+  for (let i = 0; i < 5; i++) {
+    let b = randInt(2, 9, seedBase + 150 + i * 10);
+    let a = b * randInt(2, 9, seedBase + 150 + i * 10 + 1);
+    questions.push({ q: `${a} ÷ ${b} =`, a: a / b, type: 'div' });
+  }
+  return questions;
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function renderMathMode() {
+  const container = document.getElementById('mathContainer');
+  const list = document.getElementById('mathList');
+  const result = document.getElementById('mathResult');
+  const startBtn = document.getElementById('mathStartBtn');
+  const submitBtn = document.getElementById('mathSubmitBtn');
+  const timer = document.getElementById('mathTimer');
+  const dateEl = document.getElementById('mathDate');
+
+  if (!container) return;
+
+  const d = new Date();
+  dateEl.innerText = `口算每日一练 · ${d.getMonth()+1}月${d.getDate()}日`;
+
+  container.style.display = 'flex';
+  if (list) list.innerHTML = '';
+  if (result) result.classList.remove('show');
+  if (startBtn) { startBtn.style.display = 'inline-flex'; startBtn.innerText = '开始练习'; }
+  if (submitBtn) submitBtn.style.display = 'none';
+  if (timer) timer.innerText = '00:00';
+
+  if (mathTimerInterval) {
+    clearInterval(mathTimerInterval);
+    mathTimerInterval = null;
+  }
+}
+
+function startMath() {
+  const list = document.getElementById('mathList');
+  const startBtn = document.getElementById('mathStartBtn');
+  const submitBtn = document.getElementById('mathSubmitBtn');
+  const result = document.getElementById('mathResult');
+
+  mathQuestions = generateDailyMath();
+  if (list) list.innerHTML = '';
+  if (result) result.classList.remove('show');
+
+  mathQuestions.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'math-item';
+    div.innerHTML = `<span class="math-q">${idx + 1}. ${item.q}</span><input type="number" class="math-input" id="math-${idx}" autocomplete="off" inputmode="numeric"><span class="math-ans">答案: ${item.a}</span>`;
+    if (list) list.appendChild(div);
+  });
+
+  if (startBtn) startBtn.style.display = 'none';
+  if (submitBtn) submitBtn.style.display = 'inline-flex';
+
+  mathStartTime = Date.now();
+  mathTimerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - mathStartTime) / 1000);
+    const timer = document.getElementById('mathTimer');
+    if (timer) timer.innerText = formatTime(elapsed);
+  }, 1000);
+}
+
+function submitMath() {
+  if (mathTimerInterval) {
+    clearInterval(mathTimerInterval);
+    mathTimerInterval = null;
+  }
+
+  const elapsed = Math.floor((Date.now() - mathStartTime) / 1000);
+  let correct = 0;
+
+  mathQuestions.forEach((item, idx) => {
+    const input = document.getElementById(`math-${idx}`);
+    if (!input) return;
+    const div = input.parentElement;
+    const val = parseInt(input.value);
+    if (val === item.a) {
+      div.classList.add('correct');
+      correct++;
+    } else {
+      div.classList.add('wrong');
+      input.disabled = true;
+    }
+  });
+
+  const scoreText = document.getElementById('mathScoreText');
+  if (scoreText) scoreText.innerHTML = `答对 <b>${correct}/${MATH_COUNT}</b> 题，用时 <b>${formatTime(elapsed)}</b>`;
+  const result = document.getElementById('mathResult');
+  if (result) result.classList.add('show');
+  const submitBtn = document.getElementById('mathSubmitBtn');
+  if (submitBtn) submitBtn.style.display = 'none';
+  const startBtn = document.getElementById('mathStartBtn');
+  if (startBtn) { startBtn.style.display = 'inline-flex'; startBtn.innerText = '再来一组'; }
+
+  // 保存记录
+  const records = JSON.parse(localStorage.getItem('mathDailyRecords') || '[]');
+  records.unshift({
+    date: new Date().toISOString().slice(0, 10),
+    correct,
+    total: MATH_COUNT,
+    time: elapsed
+  });
+  localStorage.setItem('mathDailyRecords', JSON.stringify(records.slice(0, 30)));
+}
+
+function showMathHistory() {
+  const history = document.getElementById('mathHistory');
+  const records = JSON.parse(localStorage.getItem('mathDailyRecords') || '[]');
+
+  if (!history) return;
+  if (history.classList.contains('show')) {
+    history.classList.remove('show');
+    history.innerHTML = '';
+    return;
+  }
+
+  history.classList.add('show');
+  if (records.length === 0) {
+    history.innerHTML = '<div class="math-history-item" style="color:#94a3b8;text-align:center;">暂无记录</div>';
+    return;
+  }
+
+  history.innerHTML = '<div style="font-weight:bold;color:#64748b;margin-bottom:6px;font-size:13px;">最近记录</div>';
+  records.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'math-history-item';
+    div.innerHTML = `<span>${r.date}</span><span><b>${r.correct}/${r.total}</b> 题 · ${formatTime(r.time)}</span>`;
+    history.appendChild(div);
+  });
 }
 </script>
 </body>
