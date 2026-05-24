@@ -453,6 +453,11 @@
     .btn:active {
       transform: scale(0.98);
     }
+    .btn {
+      touch-action: manipulation;
+      pointer-events: auto;
+      -webkit-touch-callout: none;
+    }
     .btn.blue {
       background: #2563eb;
     }
@@ -742,6 +747,56 @@
       color: #1e293b;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
+
+    /* ========== 自动批改开关 ========== */
+    .auto-check-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #64748b;
+      padding: 4px 0;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      display: inline-block;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      border-radius: 20px;
+      transition: .3s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .3s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: #10b981;
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(16px);
+    }
   </style>
 </head>
 <body>
@@ -901,6 +956,15 @@
       <div class="math-history" id="mathHistory"></div>
     </div>
 
+    <!-- 自动批改开关 -->
+    <div id="autoCheckWrap" class="auto-check-wrap">
+      <label class="toggle-switch">
+        <input type="checkbox" id="autoCheckToggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+      <span>自动批改</span>
+    </div>
+
     <!-- 交互控制面板 -->
     <div class="row" id="wordControls">
       <button id="prevBtn" class="btn gray" style="flex:1">上一题</button>
@@ -976,6 +1040,16 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("mathStartBtn", "click", startMath);
   safeAddListener("mathSubmitBtn", "click", submitMath);
   safeAddListener("mathHistoryBtn", "click", showMathHistory);
+
+  // 初始化自动批改开关
+  const autoCheckToggle = document.getElementById("autoCheckToggle");
+  if (autoCheckToggle) {
+    autoCheckToggle.checked = autoCheckEnabled;
+    autoCheckToggle.addEventListener("change", function() {
+      autoCheckEnabled = this.checked;
+      localStorage.setItem("autoCheckEnabled", autoCheckEnabled);
+    });
+  }
 
   // iPad防晃终极拦截器：如果滑动的不是错题弹窗里的列表，则一律阻止页面整体滚动
   document.addEventListener('touchmove', function(e) {
@@ -1078,7 +1152,10 @@ function renderWord(){
 }
 
 // 自动检测并核对答案，若全对则自动翻页
+let autoCheckEnabled = localStorage.getItem('autoCheckEnabled') !== 'false';
+
 function checkAndAutoSubmit() {
+  if (!autoCheckEnabled) return; // 开关关闭时不自动提交
   const typeSelect = document.getElementById("typeSelect");
   if (!typeSelect) return;
   const type = typeSelect.value;
@@ -1437,6 +1514,7 @@ function switchSubject(subject) {
   const pyKb = document.getElementById('pinyinKeyboard');
   const errW = document.querySelector('.error-widget');
   const rBanner = document.getElementById('reviewBanner');
+  const autoCheckWrap = document.getElementById('autoCheckWrap');
 
   if (subject === 'math') {
     if (tabChinese) tabChinese.classList.remove('active');
@@ -1450,6 +1528,7 @@ function switchSubject(subject) {
     if (pyKb) pyKb.style.display = 'none';
     if (errW) errW.style.display = 'none';
     if (wordC) wordC.style.display = 'none';
+    if (autoCheckWrap) autoCheckWrap.style.display = 'none';
     if (rBanner) rBanner.style.display = 'none';
     if (mathC) { mathC.style.display = 'flex'; renderMathMode(); }
   } else {
@@ -1464,6 +1543,7 @@ function switchSubject(subject) {
     if (pyKb) pyKb.style.display = 'none';
     if (errW) errW.style.display = 'flex';
     if (wordC) wordC.style.display = 'flex';
+    if (autoCheckWrap) autoCheckWrap.style.display = 'flex';
     if (rBanner) rBanner.style.display = isReviewMode ? 'flex' : 'none';
     if (mathC) mathC.style.display = 'none';
     renderWord();
