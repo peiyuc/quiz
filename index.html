@@ -1088,6 +1088,7 @@ let currentErrFilter = 'chinese'; // 错题本当前筛选学科
 let dailyChineseQuestions = []; // 语文每日一练题目
 let dailyChineseStartTime = null; // 语文每日一练开始时间
 let dailyChineseResults = []; // 语文每日一练每题结果
+let dailyChineseCompleted = false; // 防止完成后重复保存记录
 
 document.addEventListener("DOMContentLoaded", function(){
   // 安全事件绑定函数：当部分 DOM 元素因延迟加载或特定渲染时返回 null 时，不中断 JavaScript 编译
@@ -1193,6 +1194,14 @@ function generateDailyChinese() {
   return result;
 }
 
+function getLocalDateString() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function filterWord() {
   const uSelect = document.getElementById("unitSelect");
   const lSelect = document.getElementById("lessonSelect");
@@ -1209,6 +1218,7 @@ function filterWord() {
     currentIdx = 0;
     dailyChineseStartTime = Date.now();
     dailyChineseResults = [];
+    dailyChineseCompleted = false;
     renderWord();
     return;
   }
@@ -1402,7 +1412,8 @@ function checkAnswer(){
     // 语文每日一练记录结果
     if (type === "daily-chinese") {
       dailyChineseResults[currentIdx] = !hasWrong;
-      if (currentIdx === 9) {
+      if (currentIdx === 9 && !dailyChineseCompleted) {
+        dailyChineseCompleted = true;
         // 最后一题，显示总成绩
         const correct = dailyChineseResults.filter(Boolean).length;
         const elapsed = Math.floor((Date.now() - dailyChineseStartTime) / 1000);
@@ -1411,7 +1422,7 @@ function checkAnswer(){
         // 保存记录（包含本次题目列表，用于去重）
         const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
         records.unshift({ 
-          date: new Date().toISOString().slice(0, 10), 
+          date: getLocalDateString(), 
           correct, 
           total: 10, 
           time: elapsed,
@@ -1543,6 +1554,7 @@ function refreshDailyChinese() {
   currentIdx = 0;
   dailyChineseStartTime = Date.now();
   dailyChineseResults = [];
+  dailyChineseCompleted = false;
   renderWord();
 }
 
@@ -1580,8 +1592,8 @@ function addCustomWord() {
     unit: "custom",
     lessonId: "custom",
     sentence: "",
-    target: "",
-    targetPinyin: ""
+    target: word,
+    targetPinyin: pinyin
   });
   
   localStorage.setItem('customChineseWords', JSON.stringify(customWords));
@@ -1621,7 +1633,13 @@ function renderCustomWordList() {
     div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px;';
     
     const info = document.createElement('span');
-    info.innerHTML = '<b>' + item.word + '</b> <span style="color:#64748b;">[' + item.pinyin + ']</span>';
+    const wordText = document.createElement('b');
+    wordText.textContent = item.word;
+    const pinyinText = document.createElement('span');
+    pinyinText.style.color = '#64748b';
+    pinyinText.textContent = ' [' + item.pinyin + ']';
+    info.appendChild(wordText);
+    info.appendChild(pinyinText);
     div.appendChild(info);
     
     const delBtn = document.createElement('button');
@@ -1791,7 +1809,7 @@ function submitMath() {
   // 保存记录
   const records = JSON.parse(localStorage.getItem('mathDailyRecords') || '[]');
   records.unshift({
-    date: new Date().toISOString().slice(0, 10),
+    date: getLocalDateString(),
     correct,
     total: MATH_COUNT,
     time: elapsed
