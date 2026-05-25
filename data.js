@@ -97,7 +97,7 @@ const wordLib = [
   { unit: "2", lessonId: "6", word: "丝毫", pinyin: "sī háo", sentence: "今天数学课堂上我们学了关于[毫]米的知识。", target: "毫", targetPinyin: "háo" },
   { unit: "2", lessonId: "6", word: "犹如", pinyin: "yóu rú", sentence: "平静的湖面[犹如]一面硕大的平镜。", target: "犹如", targetPinyin: "yóu rú" },
   { unit: "2", lessonId: "6", word: "犹豫", pinyin: "yóu yù", sentence: "面对选择，他有些[犹豫]不定。", target: "犹豫", targetPinyin: "yóu yù" },
-  { unit: "2", lessonId: "6", word: "狡猾", pinyin: "jiǎo huá", sentence: "狐狸是一种很[狡]猾的动物。", target: "狡", targetPinyin: "jiáo" },
+  { unit: "2", lessonId: "6", word: "狡猾", pinyin: "jiǎo huá", sentence: "狐狸是一种很[狡]猾的动物。", target: "狡", targetPinyin: "jiǎo" },
   { unit: "2", lessonId: "6", word: "猾头", pinyin: "huá tóu", sentence: "狡猾的老鼠总能躲开猫的追[捕]。", target: "捕", targetPinyin: "bǔ" },
   { unit: "2", lessonId: "6", word: "互相", pinyin: "hù xiāng", sentence: "真相终于水落石出，我[相]信你，一定可以。", target: "相", targetPinyin: "xiāng" },
 
@@ -170,7 +170,7 @@ const wordLib = [
   { unit: "3", lessonId: "10", word: "逆风", pinyin: "nì fēng", sentence: "小船[逆]着水流慢慢向前行驶。", target: "逆", targetPinyin: "nì" },
   { unit: "3", lessonId: "10", word: "陌生", pinyin: "mò shēng", sentence: "来到[陌]生的城市，我感到有些紧张。", target: "陌", targetPinyin: "mò" },
   { unit: "3", lessonId: "10", word: "大概", pinyin: "dà gài", sentence: "这件事的大[概]情况，老师已经告诉我们了。", target: "概", targetPinyin: "gài" },
-  { unit: "3", lessonId: "10", word: "特殊", pinyin: "tè shū", sentence: "熊猫是一种特[shū]的动物，深受大家喜爱。", target: "殊", targetPinyin: "shū" },
+  { unit: "3", lessonId: "10", word: "特殊", pinyin: "tè shū", sentence: "熊猫是一种特[殊]的动物，深受大家喜爱。", target: "殊", targetPinyin: "shū" },
 
   // 第11课《小虾》
   { unit: "3", lessonId: "11", word: "空隙", pinyin: "kòng xì", sentence: "我的铅笔掉进了缝[隙]里，够不着了。", target: "隙", targetPinyin: "xì" },
@@ -290,7 +290,7 @@ const wordLib = [
   { unit: "6", lessonId: "17", word: "嗓子", pinyin: "sǎng zi", sentence: "小红的[嗓]子哑了，说不出话。", target: "嗓", targetPinyin: "sǎng" },
   { unit: "6", lessonId: "17", word: "发痒", pinyin: "fā yǎng", sentence: "蚊子咬了我一口，皮肤特别[痒]。", target: "痒", targetPinyin: "yǎng" },
   { unit: "6", lessonId: "17", word: "椭圆", pinyin: "tuǒ yuán", sentence: "这个洞口是[椭]圆形的。", target: "椭", targetPinyin: "tuǒ" },
-  { unit: "6", lessonId: "17", word: "嘴馋", pinyin: "zuǐ chán", sentence: "看到好吃的蛋糕，我嘴[chán]得直流口水。", target: "馋", targetPinyin: "chán" },
+  { unit: "6", lessonId: "17", word: "嘴馋", pinyin: "zuǐ chán", sentence: "看到好吃的蛋糕，我嘴[馋]得直流口水。", target: "馋", targetPinyin: "chán" },
 
   // ================= 第七单元 =================
   // 第18课《童年的水墨画》

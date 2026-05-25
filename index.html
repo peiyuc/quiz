@@ -6,6 +6,17 @@
   <title>小学天天练 - 字词+口算每日一练</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
+    :root {
+      --color-text: #1e293b;
+      --color-muted: #64748b;
+      --color-primary: #2563eb;
+      --color-danger: #ef4444;
+      --color-danger-dark: #dc2626;
+      --color-danger-border: #fca5a5;
+      --color-bg-soft: #f8fafc;
+      --color-border: #e2e8f0;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -1163,6 +1174,60 @@ function updateLessonSelect() {
   } else if (lessonMap[u]) { lessonMap[u].forEach(l => { const opt = document.createElement("option"); opt.value = l.id; opt.innerText = l.name; lessonSelect.appendChild(opt); }); }
 }
 
+function validateWordLib() {
+  if (!Array.isArray(wordLib)) {
+    console.error('[wordLib校验] wordLib 不是数组');
+    return;
+  }
+
+  const requiredFields = ['unit', 'lessonId', 'word', 'pinyin', 'sentence', 'target', 'targetPinyin'];
+  const pinyinReg = /^[a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s]+$/i;
+  const issues = [];
+  const uniqueKeys = new Set();
+
+  wordLib.forEach((item, idx) => {
+    const prefix = `#${idx + 1}(${item?.word || '未知词'})`;
+
+    requiredFields.forEach((field) => {
+      if (!item || item[field] === undefined || item[field] === null || String(item[field]).trim() === '') {
+        issues.push(`${prefix} 缺少字段: ${field}`);
+      }
+    });
+
+    if (!item) return;
+
+    const key = `${item.unit}|${item.lessonId}|${item.word}|${item.target}`;
+    if (uniqueKeys.has(key)) {
+      issues.push(`${prefix} 疑似重复词条: ${key}`);
+    } else {
+      uniqueKeys.add(key);
+    }
+
+    if (item.target && item.word && !String(item.word).includes(String(item.target))) {
+      issues.push(`${prefix} target 不在 word 中: target=${item.target}, word=${item.word}`);
+    }
+
+    if (item.sentence && item.target && !String(item.sentence).includes(`[${item.target}]`)) {
+      issues.push(`${prefix} sentence 未标记 [target] 占位`);
+    }
+
+    if (item.targetPinyin && !pinyinReg.test(String(item.targetPinyin))) {
+      issues.push(`${prefix} targetPinyin 格式可疑: ${item.targetPinyin}`);
+    }
+  });
+
+  if (issues.length) {
+    console.group(`[wordLib校验] 发现 ${issues.length} 个潜在问题`);
+    issues.slice(0, 80).forEach(i => console.warn(i));
+    if (issues.length > 80) {
+      console.warn(`... 其余 ${issues.length - 80} 条已省略`);
+    }
+    console.groupEnd();
+  } else {
+    console.info(`[wordLib校验] 通过，共 ${wordLib.length} 条`);
+  }
+}
+
 function getCustomChineseWords() {
   return JSON.parse(localStorage.getItem('customChineseWords') || '[]');
 }
@@ -1928,6 +1993,8 @@ function switchSubject(subject) {
     renderWord();
   }
 }
+
+validateWordLib();
 </script>
 </body>
 </html>
