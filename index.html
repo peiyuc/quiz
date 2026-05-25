@@ -659,6 +659,8 @@
       gap: 12px;
       max-height: 50vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
     @media (max-width: 600px) {
       .math-list { grid-template-columns: 1fr; }
@@ -730,6 +732,8 @@
       margin-top: 10px;
       max-height: 200px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       background: #f8fafc;
       border-radius: 8px;
       padding: 8px;
@@ -992,6 +996,12 @@
     </div>
     <div class="math-history" id="chineseDailyHistory"></div>
 
+    <!-- 语文每日一练专属控制 -->
+    <div class="row" id="dailyControls" style="display:none; margin-bottom: 8px;">
+      <button id="refreshDailyBtn" class="btn blue" style="flex:1">🔄 换一批</button>
+      <button id="addWordBtn" class="btn green" style="flex:1">➕ 添加题目</button>
+    </div>
+
     <!-- 交互控制面板 -->
     <div class="row" id="wordControls">
       <button id="prevBtn" class="btn gray" style="flex:1">上一题</button>
@@ -1030,6 +1040,28 @@
     </div>
     
     <div id="errList"></div>
+  </div>
+</div>
+
+<!-- 添加题目弹窗 -->
+<div id="addWordModal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">
+      <h2 style="font-size: 18px; color: #1e293b;">添加自定义题目</h2>
+      <button id="closeAddWordModal" style="border:none;background:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1;">&times;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:13px;color:#64748b;display:block;margin-bottom:4px;">词语</label>
+        <input type="text" id="customWordInput" placeholder="如：春暖花开" style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:16px;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#64748b;display:block;margin-bottom:4px;">拼音</label>
+        <input type="text" id="customPinyinInput" placeholder="如：chūn nuǎn huā kāi" style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:16px;box-sizing:border-box;">
+      </div>
+      <button id="submitCustomWord" class="btn green" style="width:100%;margin-top:4px;">添加</button>
+    </div>
+    <div id="customWordList" style="margin-top:16px;max-height:200px;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -1092,6 +1124,10 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("mathSubmitBtn", "click", submitMath);
   safeAddListener("mathHistoryBtn", "click", showMathHistory);
   safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
+  safeAddListener("refreshDailyBtn", "click", refreshDailyChinese);
+  safeAddListener("addWordBtn", "click", showAddWordModal);
+  safeAddListener("closeAddWordModal", "click", hideAddWordModal);
+  safeAddListener("submitCustomWord", "click", addCustomWord);
 
   // 初始化自动批改开关
   const autoCheckToggle = document.getElementById("autoCheckToggle");
@@ -1105,8 +1141,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
   // iPad防晃终极拦截器：如果滑动的不是错题弹窗里的列表，则一律阻止页面整体滚动
   document.addEventListener('touchmove', function(e) {
-    if (e.target.closest('#errList, .modal-content')) {
-      return; // 允许弹窗内的列表正常滑动查看
+    if (e.target.closest('#errList, .modal-content, .math-list, .math-history')) {
+      return; // 允许弹窗及数学列表内的正常滑动查看
     }
     e.preventDefault(); // 拦截、锁定主屏幕的晃动和滚动
   }, { passive: false });
@@ -1126,10 +1162,35 @@ function updateLessonSelect() {
   } else if (lessonMap[u]) { lessonMap[u].forEach(l => { const opt = document.createElement("option"); opt.value = l.id; opt.innerText = l.name; lessonSelect.appendChild(opt); }); }
 }
 
+function getCustomChineseWords() {
+  return JSON.parse(localStorage.getItem('customChineseWords') || '[]');
+}
+
 function generateDailyChinese() {
-  const seed = getTodaySeed();
-  const shuffled = [...wordLib].sort((a, b) => seededRandom(seed + a.word.charCodeAt(0)) - seededRandom(seed + b.word.charCodeAt(0)));
-  return shuffled.slice(0, 10);
+  // 读取自定义题目
+  const customWords = getCustomChineseWords();
+  const allWords = [...wordLib, ...customWords];
+  
+  // 读取历史记录，收集已出过的词语（取最近30条记录）
+  const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
+  const usedWords = new Set();
+  records.slice(0, 30).forEach(r => {
+    if (r.words && Array.isArray(r.words)) {
+      r.words.forEach(w => usedWords.add(w));
+    }
+  });
+  
+  // 分成未出过和已出过的
+  const unused = allWords.filter(item => !usedWords.has(item.word));
+  const used = allWords.filter(item => usedWords.has(item.word));
+  
+  // 随机打乱
+  const shuffledUnused = unused.sort(() => Math.random() - 0.5);
+  const shuffledUsed = used.sort(() => Math.random() - 0.5);
+  
+  // 优先取未出过的，不够再补充已出过的
+  const result = [...shuffledUnused, ...shuffledUsed].slice(0, 10);
+  return result;
 }
 
 function filterWord() {
@@ -1191,6 +1252,9 @@ function renderWord(){
   if (charC) charC.style.display = "flex";
   if (chineseHistoryBtn) chineseHistoryBtn.style.display = type === 'daily-chinese' ? 'inline-flex' : 'none';
   if (type !== 'daily-chinese' && chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
+  // 语文每日一练专属控制栏
+  const dailyControls = document.getElementById('dailyControls');
+  if (dailyControls) dailyControls.style.display = type === 'daily-chinese' ? 'flex' : 'none';
 
   if(filterWords.length===0){ 
     if (pyShow) {
@@ -1344,9 +1408,15 @@ function checkAnswer(){
         const elapsed = Math.floor((Date.now() - dailyChineseStartTime) / 1000);
         const tip = document.getElementById("tip");
         if (tip) tip.innerText = `🎉 完成！答对 ${correct}/10 题，用时 ${formatTime(elapsed)}`;
-        // 保存记录
+        // 保存记录（包含本次题目列表，用于去重）
         const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
-        records.unshift({ date: new Date().toISOString().slice(0, 10), correct, total: 10, time: elapsed });
+        records.unshift({ 
+          date: new Date().toISOString().slice(0, 10), 
+          correct, 
+          total: 10, 
+          time: elapsed,
+          words: dailyChineseQuestions.map(q => q.word)
+        });
         localStorage.setItem('chineseDailyRecords', JSON.stringify(records.slice(0, 30)));
       }
     }
@@ -1464,6 +1534,104 @@ function exitReview() {
   if (rBanner) rBanner.style.display = "none";
   // 重新加载标准过滤下的题目列表
   filterWord();
+}
+
+// ========== 语文每日一练：换一批 + 添加题目 ==========
+function refreshDailyChinese() {
+  dailyChineseQuestions = generateDailyChinese();
+  filterWords = dailyChineseQuestions;
+  currentIdx = 0;
+  dailyChineseStartTime = Date.now();
+  dailyChineseResults = [];
+  renderWord();
+}
+
+function showAddWordModal() {
+  const modal = document.getElementById('addWordModal');
+  if (modal) modal.style.display = 'flex';
+  renderCustomWordList();
+}
+
+function hideAddWordModal() {
+  const modal = document.getElementById('addWordModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function addCustomWord() {
+  const wordInput = document.getElementById('customWordInput');
+  const pinyinInput = document.getElementById('customPinyinInput');
+  const word = wordInput ? wordInput.value.trim() : '';
+  const pinyin = pinyinInput ? pinyinInput.value.trim() : '';
+  
+  if (!word || !pinyin) {
+    alert('请填写词语和拼音');
+    return;
+  }
+  
+  const customWords = getCustomChineseWords();
+  if (customWords.find(item => item.word === word)) {
+    alert('该词语已存在');
+    return;
+  }
+  
+  customWords.push({
+    word: word,
+    pinyin: pinyin,
+    unit: "custom",
+    lessonId: "custom",
+    sentence: "",
+    target: "",
+    targetPinyin: ""
+  });
+  
+  localStorage.setItem('customChineseWords', JSON.stringify(customWords));
+  if (wordInput) wordInput.value = '';
+  if (pinyinInput) pinyinInput.value = '';
+  renderCustomWordList();
+  
+  // 如果当前在每日一练模式，刷新题目以包含新添加的词语
+  const typeSelect = document.getElementById('typeSelect');
+  if (typeSelect && typeSelect.value === 'daily-chinese') {
+    refreshDailyChinese();
+  }
+}
+
+function removeCustomWord(word) {
+  let customWords = getCustomChineseWords();
+  customWords = customWords.filter(item => item.word !== word);
+  localStorage.setItem('customChineseWords', JSON.stringify(customWords));
+  renderCustomWordList();
+}
+
+function renderCustomWordList() {
+  const listDom = document.getElementById('customWordList');
+  if (!listDom) return;
+  const customWords = getCustomChineseWords();
+  listDom.innerHTML = '';
+  
+  if (customWords.length === 0) return;
+  
+  const header = document.createElement('p');
+  header.style.cssText = 'font-size:13px;color:#64748b;margin-bottom:8px;border-bottom:1px solid #f1f5f9;padding-bottom:6px;';
+  header.innerText = '已添加的题目（' + customWords.length + '道）';
+  listDom.appendChild(header);
+  
+  customWords.forEach(item => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px;';
+    
+    const info = document.createElement('span');
+    info.innerHTML = '<b>' + item.word + '</b> <span style="color:#64748b;">[' + item.pinyin + ']</span>';
+    div.appendChild(info);
+    
+    const delBtn = document.createElement('button');
+    delBtn.innerText = '删除';
+    delBtn.style.cssText = 'border:none;background:#fef2f2;color:#ef4444;padding:2px 8px;border-radius:4px;font-size:12px;cursor:pointer;';
+    delBtn.onclick = function() { removeCustomWord(item.word); };
+    div.appendChild(delBtn);
+    
+    listDom.appendChild(div);
+  });
 }
 
 // ========== 口算每日一练 ==========
@@ -1703,6 +1871,7 @@ function switchSubject(subject) {
   const typeSelect = document.getElementById('typeSelect');
   const isDailyChinese = typeSelect && typeSelect.value === 'daily-chinese';
 
+  const dailyControls = document.getElementById('dailyControls');
   if (subject === 'math') {
     if (tabChinese) tabChinese.classList.remove('active');
     if (tabMath) tabMath.classList.add('active');
@@ -1715,6 +1884,7 @@ function switchSubject(subject) {
     if (pyKb) pyKb.style.display = 'none';
     // 错题本是通用能力，数学模式下也显示（已在 HTML 中控制位置）
     if (wordC) wordC.style.display = 'none';
+    if (dailyControls) dailyControls.style.display = 'none';
     if (autoCheckWrap) autoCheckWrap.style.display = 'none';
     if (rBanner) rBanner.style.display = 'none';
     if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
