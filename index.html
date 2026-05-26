@@ -39,7 +39,8 @@
       
       display: flex;
       flex-direction: column;
-      touch-action: none; /* 禁用系统级默认手势操作（缩放和整页拖动） */
+      touch-action: manipulation; /* 保留点击/Apple Pencil 操作，整页拖动由 touchmove 拦截器控制 */
+      overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       -webkit-user-select: none;
@@ -1158,6 +1159,34 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     e.preventDefault(); // 拦截、锁定主屏幕的晃动和滚动
   }, { passive: false });
+
+  // Apple Pencil 在 iPad Safari 中偶尔只触发 pointer 事件，主动补一次聚焦/点击。
+  let pendingPenClick = null;
+  document.addEventListener('click', function(e) {
+    if (!pendingPenClick) return;
+    if (pendingPenClick.target === e.target || pendingPenClick.target.contains(e.target)) {
+      clearTimeout(pendingPenClick.timer);
+      pendingPenClick = null;
+    }
+  }, true);
+
+  document.addEventListener('pointerup', function(e) {
+    if (e.pointerType !== 'pen') return;
+    const target = e.target.closest('input, textarea, button, label, select');
+    if (!target || target.disabled) return;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+      target.focus();
+      return;
+    }
+    if (pendingPenClick) clearTimeout(pendingPenClick.timer);
+    pendingPenClick = {
+      target,
+      timer: setTimeout(function() {
+        target.click();
+        pendingPenClick = null;
+      }, 80)
+    };
+  });
 
   updateLessonSelect(); filterWord(); updateErrCount(); renderErrList();
 });
