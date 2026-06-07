@@ -732,6 +732,68 @@
       padding: 0 10px;
       font-size: 16px;
     }
+    .science-list {
+      grid-template-columns: 1fr;
+    }
+    .science-item {
+      align-items: stretch;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 16px;
+    }
+    .science-item .math-q {
+      min-width: 0;
+      line-height: 1.45;
+    }
+    .science-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .science-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 9px 10px;
+      color: #334155;
+      background: #f8fafc;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .science-option input {
+      width: 18px;
+      height: 18px;
+      accent-color: #2563eb;
+    }
+    .science-option.correct-choice {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #047857;
+      font-weight: bold;
+    }
+    .science-option.wrong-choice {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .science-explain {
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #64748b;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .science-item.wrong .science-explain,
+    .science-item.correct .science-explain {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .science-options { grid-template-columns: 1fr; }
+    }
     .math-result {
       display: none;
       background: #f0fdf4;
@@ -990,6 +1052,7 @@
     <button class="tab-btn active" id="tabChinese" onclick="switchSubject('chinese')">📖 语文</button>
     <button class="tab-btn" id="tabMath" onclick="switchSubject('math')">🔢 数学</button>
     <button class="tab-btn" id="tabEnglish" onclick="switchSubject('english')">🔤 英语</button>
+    <button class="tab-btn" id="tabScience" onclick="switchSubject('science')">🔬 科学</button>
   </div>
   <div class="page-nav">
     <button class="nav-btn" id="navPoints" onclick="openFeaturePage('points')">积分中心</button>
@@ -1157,6 +1220,25 @@
         <button id="englishHistoryBtn" class="btn gray" style="flex:1">历史记录</button>
       </div>
       <div class="math-history" id="englishHistory"></div>
+    </div>
+
+    <!-- 科学每日一练 -->
+    <div id="scienceContainer" class="math-container">
+      <div class="math-header">
+        <span class="math-date" id="scienceDate">科学每日一练</span>
+        <span class="math-timer" id="scienceTimer">00:00</span>
+      </div>
+      <div class="math-list science-list" id="scienceList"></div>
+      <div class="math-result" id="scienceResult">
+        <h3>🎉 完成！</h3>
+        <p id="scienceScoreText"></p>
+      </div>
+      <div class="row" id="scienceControls">
+        <button id="scienceStartBtn" class="btn green" style="flex:1">开始练习</button>
+        <button id="scienceSubmitBtn" class="btn blue" style="flex:1;display:none">交卷</button>
+        <button id="scienceHistoryBtn" class="btn gray" style="flex:1">历史记录</button>
+      </div>
+      <div class="math-history" id="scienceHistory"></div>
     </div>
 
     <!-- 自动批改开关 + 语文历史记录 -->
@@ -1397,6 +1479,38 @@ const englishLib = [
   { unit: '6', word: 'nineteen', cn: '十九', aliases: ['nineteen'] },
   { unit: '6', word: 'twenty', cn: '二十', aliases: ['twenty'] }
 ];
+const scienceLib = [
+  { unit: '运动', q: '判断一个物体是运动还是静止，通常要先选择什么？', options: ['参照物', '温度计', '放大镜', '指南针'], answer: 0, explain: '和参照物的位置发生变化，物体就是运动的。' },
+  { unit: '运动', q: '描述“教学楼在操场的北面”时，用到的是物体的什么？', options: ['位置', '质量', '颜色', '温度'], answer: 0, explain: '方向和距离可以帮助我们描述物体的位置。' },
+  { unit: '运动', q: '下面哪一种运动最接近“直线运动”？', options: ['电梯上下运行', '风车转动', '钟表指针转动', '旋转木马转动'], answer: 0, explain: '沿着直直的路线移动，是直线运动。' },
+  { unit: '运动', q: '钟表指针的运动属于哪一类？', options: ['转动', '平动', '静止', '振动'], answer: 0, explain: '指针围绕固定点转动。' },
+  { unit: '运动', q: '比较两个小球运动快慢时，比较公平的方法是？', options: ['相同距离比时间', '随便看一眼', '只比颜色', '只比大小'], answer: 0, explain: '相同距离用时越短，运动越快。' },
+  { unit: '运动', q: '在相同时间内，物体通过的距离越长，说明它运动得？', options: ['越快', '越慢', '没有运动', '无法判断'], answer: 0, explain: '相同时间内距离越长，速度越快。' },
+  { unit: '运动', q: '要测量小车运动的距离，适合使用哪种工具？', options: ['卷尺', '温度计', '量杯', '天平'], answer: 0, explain: '卷尺可以测量长度或距离。' },
+  { unit: '运动', q: '斜面坡度越大，小球通常滚动得？', options: ['越快', '越慢', '一定静止', '方向不变但速度为零'], answer: 0, explain: '坡度越大，小球受到沿斜面向下的作用越明显。' },
+  { unit: '运动', q: '做小车运动实验时，每次都从同一位置释放，是为了？', options: ['保证实验公平', '让小车更漂亮', '减少记录', '改变小车颜色'], answer: 0, explain: '公平实验要尽量只改变一个条件。' },
+  { unit: '运动', q: '下面哪项可以记录小球运动的快慢？', options: ['距离和时间', '颜色和形状', '声音和气味', '名字和编号'], answer: 0, explain: '运动快慢需要结合距离和时间判断。' },
+  { unit: '运动', q: '荡秋千时，秋千主要做什么运动？', options: ['往复运动', '直线运动', '完全静止', '只向一个方向运动'], answer: 0, explain: '来回反复的运动叫往复运动。' },
+  { unit: '运动', q: '物体在斜面上由高处向低处运动，常见原因是受到什么影响？', options: ['重力', '阳光颜色', '空气味道', '声音大小'], answer: 0, explain: '重力会使物体有向下运动的趋势。' },
+  { unit: '动物', q: '蚕的一生一般要经历哪几个阶段？', options: ['卵、幼虫、蛹、成虫', '卵、成虫、蛹、幼虫', '幼虫、卵、成虫、蛹', '蛹、卵、幼虫、成虫'], answer: 0, explain: '蚕的生命周期是卵、幼虫、蛹、成虫。' },
+  { unit: '动物', q: '刚孵出来的小蚕通常是什么颜色？', options: ['黑褐色', '鲜红色', '蓝色', '紫色'], answer: 0, explain: '刚孵出的小蚕很小，常呈黑褐色，像蚂蚁。' },
+  { unit: '动物', q: '饲养蚕宝宝时，主要喂它吃什么？', options: ['桑叶', '米饭', '肉片', '饼干'], answer: 0, explain: '蚕主要以桑叶为食。' },
+  { unit: '动物', q: '蚕宝宝长大过程中会多次蜕皮，这是因为？', options: ['身体长大，外皮限制生长', '天气太冷', '桑叶太甜', '它要变成植物'], answer: 0, explain: '旧皮不能随身体继续长大，所以需要蜕皮。' },
+  { unit: '动物', q: '蚕吐丝结茧后，在茧里会变成什么？', options: ['蛹', '卵', '桑叶', '小鸟'], answer: 0, explain: '蚕结茧后会在茧内变成蛹。' },
+  { unit: '动物', q: '蚕蛾从茧里出来后，主要任务是？', options: ['交配产卵', '继续吃桑叶长大', '学习飞高', '变成蛹'], answer: 0, explain: '成虫蚕蛾主要完成繁殖。' },
+  { unit: '动物', q: '鸡蛋中能发育成小鸡的结构是？', options: ['胚盘', '蛋壳', '气室', '蛋白'], answer: 0, explain: '受精后的胚盘能发育成小鸡。' },
+  { unit: '动物', q: '鸡蛋的哪一部分能保护里面的结构？', options: ['蛋壳', '蛋黄', '蛋白', '胚盘'], answer: 0, explain: '蛋壳坚硬，可以保护鸡蛋内部。' },
+  { unit: '动物', q: '像鸡这样靠产卵繁殖后代的动物叫做？', options: ['卵生动物', '胎生动物', '哺乳动物', '无生命物体'], answer: 0, explain: '靠产卵繁殖的动物叫卵生动物。' },
+  { unit: '动物', q: '下面哪种动物属于卵生动物？', options: ['青蛙', '猫', '狗', '牛'], answer: 0, explain: '青蛙通过产卵繁殖。' },
+  { unit: '动物', q: '下面哪种动物通常属于胎生动物？', options: ['兔子', '蚕蛾', '鸡', '鱼'], answer: 0, explain: '兔子在母体内孕育幼体，属于胎生。' },
+  { unit: '动物', q: '动物从出生到长大、繁殖、死亡的过程叫做？', options: ['生命周期', '天气变化', '食物链', '位置变化'], answer: 0, explain: '动物一生经历的连续阶段叫生命周期。' },
+  { unit: '动物', q: '观察蚕宝宝时，比较合适的做法是？', options: ['轻拿轻放并及时记录', '用力挤压', '长时间暴晒', '不喂桑叶'], answer: 0, explain: '科学观察要爱护小动物，并做好记录。' },
+  { unit: '动物', q: '蚕卵孵化需要较适宜的什么条件？', options: ['温度和湿度', '强烈噪声', '盐水浸泡', '完全没有空气'], answer: 0, explain: '蚕卵孵化需要适宜环境。' },
+  { unit: '综合', q: '做科学实验时，记录数据的主要作用是？', options: ['帮助分析和比较', '让纸变重', '代替观察', '让结果更随意'], answer: 0, explain: '数据能帮助我们依据事实得出结论。' },
+  { unit: '综合', q: '如果实验结果和猜想不同，应该怎么做？', options: ['尊重事实，重新分析', '直接改数据', '不再观察', '只写猜想'], answer: 0, explain: '科学学习要尊重真实观察和实验数据。' },
+  { unit: '综合', q: '在公平实验中，除了研究的条件外，其他条件应该？', options: ['尽量保持相同', '全部随意改变', '越多越好', '不用记录'], answer: 0, explain: '控制变量才能更可靠地比较结果。' },
+  { unit: '综合', q: '观察动物成长变化，最适合采用的方法是？', options: ['连续观察并记录', '只看一次', '只听别人说', '不记录日期'], answer: 0, explain: '成长变化需要长期、连续地观察。' }
+];
 
 document.addEventListener("DOMContentLoaded", function(){
   // 安全事件绑定函数：当部分 DOM 元素因延迟加载或特定渲染时返回 null 时，不中断 JavaScript 编译
@@ -1435,6 +1549,9 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("englishStartBtn", "click", startEnglish);
   safeAddListener("englishSubmitBtn", "click", submitEnglish);
   safeAddListener("englishHistoryBtn", "click", showEnglishHistory);
+  safeAddListener("scienceStartBtn", "click", startScience);
+  safeAddListener("scienceSubmitBtn", "click", submitScience);
+  safeAddListener("scienceHistoryBtn", "click", showScienceHistory);
   safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
   safeAddListener("refreshDailyBtn", "click", refreshDailyChinese);
   safeAddListener("addWordBtn", "click", showAddWordModal);
@@ -1779,7 +1896,7 @@ function openFeaturePage(page) {
 function hidePracticeViews() {
   const selectorArea = document.getElementById('selectorArea');
   if (selectorArea) selectorArea.style.visibility = 'hidden';
-  ['reviewBanner', 'mathContainer', 'englishContainer', 'autoCheckWrap', 'chineseDailyHistory', 'dailyControls', 'wordControls', 'errorWidget', 'pinyinKeyboard', 'sentenceShow', 'pinyinShow', 'correctGrids', 'charContainer', 'tip'].forEach(id => {
+  ['reviewBanner', 'mathContainer', 'englishContainer', 'scienceContainer', 'autoCheckWrap', 'chineseDailyHistory', 'dailyControls', 'wordControls', 'errorWidget', 'pinyinKeyboard', 'sentenceShow', 'pinyinShow', 'correctGrids', 'charContainer', 'tip'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -2092,6 +2209,7 @@ function renderWord(){
   const pyKb = document.getElementById("pinyinKeyboard");
   const mathC = document.getElementById("mathContainer");
   const englishC = document.getElementById("englishContainer");
+  const scienceC = document.getElementById("scienceContainer");
   const wordC = document.getElementById("wordControls");
   const tip = document.getElementById("tip");
   const errW = document.querySelector(".error-widget");
@@ -2104,6 +2222,7 @@ function renderWord(){
   // 字词模式：隐藏口算，显示字词
   if (mathC) mathC.style.display = "none";
   if (englishC) englishC.style.display = "none";
+  if (scienceC) scienceC.style.display = "none";
   if (wordC) wordC.style.display = "flex";
   if (tip) tip.style.display = "block";
   if (errW) errW.style.display = "flex";
@@ -2510,6 +2629,10 @@ const ENGLISH_COUNT = 10;
 let englishQuestions = [];
 let englishStartTime = null;
 let englishTimerInterval = null;
+const SCIENCE_COUNT = 10;
+let scienceQuestions = [];
+let scienceStartTime = null;
+let scienceTimerInterval = null;
 
 function seededRandom(seed) {
   let x = Math.sin(seed++) * 10000;
@@ -2560,6 +2683,26 @@ function generateDailyEnglish() {
   return [...englishLib]
     .sort((a, b) => seededRandom(seedBase + a.word.charCodeAt(0)) - seededRandom(seedBase + b.word.charCodeAt(0)))
     .slice(0, ENGLISH_COUNT);
+}
+
+function generateDailyScience() {
+  const seedBase = getTodaySeed();
+  return [...scienceLib]
+    .map((item, idx) => ({ ...item, originalIndex: idx }))
+    .sort((a, b) => seededRandom(seedBase + 300 + a.originalIndex) - seededRandom(seedBase + 300 + b.originalIndex))
+    .slice(0, SCIENCE_COUNT)
+    .map((item, idx) => ({ ...item, dailyIndex: idx }));
+}
+
+function shuffleScienceOptions(item) {
+  const seedBase = getTodaySeed() + 700 + item.originalIndex;
+  const shuffled = item.options
+    .map((text, idx) => ({ text, originalIndex: idx }))
+    .sort((a, b) => seededRandom(seedBase + a.originalIndex) - seededRandom(seedBase + b.originalIndex));
+  return {
+    options: shuffled.map(opt => opt.text),
+    answer: shuffled.findIndex(opt => opt.originalIndex === item.answer)
+  };
 }
 
 function normalizeEnglishAnswer(value) {
@@ -2834,6 +2977,138 @@ function showEnglishHistory() {
   });
 }
 
+function renderScienceMode() {
+  const container = document.getElementById('scienceContainer');
+  const list = document.getElementById('scienceList');
+  const result = document.getElementById('scienceResult');
+  const startBtn = document.getElementById('scienceStartBtn');
+  const submitBtn = document.getElementById('scienceSubmitBtn');
+  const timer = document.getElementById('scienceTimer');
+  const dateEl = document.getElementById('scienceDate');
+
+  if (!container) return;
+
+  const d = new Date();
+  if (dateEl) dateEl.innerText = `科学每日一练 · ${d.getMonth()+1}月${d.getDate()}日`;
+
+  container.style.display = 'flex';
+  if (list) list.innerHTML = '';
+  if (result) result.classList.remove('show');
+  if (startBtn) { startBtn.style.display = 'inline-flex'; startBtn.innerText = '开始练习'; }
+  if (submitBtn) submitBtn.style.display = 'none';
+  if (timer) timer.innerText = '00:00';
+
+  if (scienceTimerInterval) {
+    clearInterval(scienceTimerInterval);
+    scienceTimerInterval = null;
+  }
+}
+
+function startScience() {
+  const list = document.getElementById('scienceList');
+  const startBtn = document.getElementById('scienceStartBtn');
+  const submitBtn = document.getElementById('scienceSubmitBtn');
+  const result = document.getElementById('scienceResult');
+
+  scienceQuestions = generateDailyScience().map(item => ({ ...item, choiceData: shuffleScienceOptions(item) }));
+  if (list) list.innerHTML = '';
+  if (result) result.classList.remove('show');
+
+  scienceQuestions.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'math-item science-item';
+    const optionsHtml = item.choiceData.options.map((option, optIdx) => {
+      const letter = String.fromCharCode(65 + optIdx);
+      return `<label class="science-option" id="science-${idx}-choice-${optIdx}"><input type="radio" name="science-${idx}" value="${optIdx}"><span>${letter}. ${option}</span></label>`;
+    }).join('');
+    div.innerHTML = `<span class="math-q">${idx + 1}. ${item.q}</span><div class="science-options">${optionsHtml}</div><div class="science-explain">答案：${String.fromCharCode(65 + item.choiceData.answer)}。${item.explain}</div>`;
+    if (list) list.appendChild(div);
+  });
+
+  if (startBtn) startBtn.style.display = 'none';
+  if (submitBtn) submitBtn.style.display = 'inline-flex';
+
+  scienceStartTime = Date.now();
+  scienceTimerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - scienceStartTime) / 1000);
+    const timer = document.getElementById('scienceTimer');
+    if (timer) timer.innerText = formatTime(elapsed);
+  }, 1000);
+}
+
+function submitScience() {
+  if (scienceTimerInterval) {
+    clearInterval(scienceTimerInterval);
+    scienceTimerInterval = null;
+  }
+
+  const elapsed = Math.floor((Date.now() - scienceStartTime) / 1000);
+  let correct = 0;
+
+  scienceQuestions.forEach((item, idx) => {
+    const selected = document.querySelector(`input[name="science-${idx}"]:checked`);
+    const itemEl = selected ? selected.closest('.science-item') : document.querySelector(`#science-${idx}-choice-0`)?.closest('.science-item');
+    const selectedIndex = selected ? Number(selected.value) : -1;
+    const correctChoice = document.getElementById(`science-${idx}-choice-${item.choiceData.answer}`);
+    if (correctChoice) correctChoice.classList.add('correct-choice');
+    if (selectedIndex === item.choiceData.answer) {
+      correct++;
+      if (itemEl) itemEl.classList.add('correct');
+    } else {
+      const wrongChoice = document.getElementById(`science-${idx}-choice-${selectedIndex}`);
+      if (wrongChoice) wrongChoice.classList.add('wrong-choice');
+      if (itemEl) itemEl.classList.add('wrong');
+    }
+    document.querySelectorAll(`input[name="science-${idx}"]`).forEach(input => { input.disabled = true; });
+  });
+
+  const scoreText = document.getElementById('scienceScoreText');
+  if (scoreText) scoreText.innerHTML = `答对 <b>${correct}/${SCIENCE_COUNT}</b> 题，用时 <b>${formatTime(elapsed)}</b>`;
+  const result = document.getElementById('scienceResult');
+  if (result) result.classList.add('show');
+  const submitBtn = document.getElementById('scienceSubmitBtn');
+  if (submitBtn) submitBtn.style.display = 'none';
+  const startBtn = document.getElementById('scienceStartBtn');
+  if (startBtn) { startBtn.style.display = 'inline-flex'; startBtn.innerText = '再来一组'; }
+
+  const records = JSON.parse(localStorage.getItem('scienceDailyRecords') || '[]');
+  records.unshift({
+    date: getLocalDateString(),
+    correct,
+    total: SCIENCE_COUNT,
+    time: elapsed,
+    units: [...new Set(scienceQuestions.map(q => q.unit))]
+  });
+  localStorage.setItem('scienceDailyRecords', JSON.stringify(records.slice(0, 30)));
+  completeSubjectDaily('science', correct === SCIENCE_COUNT, '科学每日一练');
+}
+
+function showScienceHistory() {
+  const history = document.getElementById('scienceHistory');
+  const records = JSON.parse(localStorage.getItem('scienceDailyRecords') || '[]');
+
+  if (!history) return;
+  if (history.classList.contains('show')) {
+    history.classList.remove('show');
+    history.innerHTML = '';
+    return;
+  }
+
+  history.classList.add('show');
+  if (records.length === 0) {
+    history.innerHTML = '<div class="math-history-item" style="color:#94a3b8;text-align:center;">暂无记录</div>';
+    return;
+  }
+
+  history.innerHTML = '<div style="font-weight:bold;color:#64748b;margin-bottom:6px;font-size:13px;">最近记录</div>';
+  records.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'math-history-item';
+    div.innerHTML = `<span>${r.date}</span><span><b>${r.correct}/${r.total}</b> 题 · ${formatTime(r.time)}</span>`;
+    history.appendChild(div);
+  });
+}
+
 function showChineseDailyHistory() {
   const history = document.getElementById('chineseDailyHistory');
   const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
@@ -2866,9 +3141,11 @@ function switchSubject(subject) {
   const tabChinese = document.getElementById('tabChinese');
   const tabMath = document.getElementById('tabMath');
   const tabEnglish = document.getElementById('tabEnglish');
+  const tabScience = document.getElementById('tabScience');
   const selectorArea = document.getElementById('selectorArea');
   const mathC = document.getElementById('mathContainer');
   const englishC = document.getElementById('englishContainer');
+  const scienceC = document.getElementById('scienceContainer');
   const wordC = document.getElementById('wordControls');
   const tip = document.getElementById('tip');
   const pyShow = document.getElementById('pinyinShow');
@@ -2888,6 +3165,7 @@ function switchSubject(subject) {
     if (tabChinese) tabChinese.classList.remove('active');
     if (tabMath) tabMath.classList.add('active');
     if (tabEnglish) tabEnglish.classList.remove('active');
+    if (tabScience) tabScience.classList.remove('active');
     if (selectorArea) selectorArea.style.visibility = 'hidden';
     if (tip) tip.style.display = 'none';
     if (pyShow) pyShow.style.display = 'none';
@@ -2903,11 +3181,13 @@ function switchSubject(subject) {
     if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
     if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
     if (englishC) englishC.style.display = 'none';
+    if (scienceC) scienceC.style.display = 'none';
     if (mathC) { mathC.style.display = 'flex'; renderMathMode(); }
   } else if (subject === 'english') {
     if (tabChinese) tabChinese.classList.remove('active');
     if (tabMath) tabMath.classList.remove('active');
     if (tabEnglish) tabEnglish.classList.add('active');
+    if (tabScience) tabScience.classList.remove('active');
     if (selectorArea) selectorArea.style.visibility = 'hidden';
     if (tip) tip.style.display = 'none';
     if (pyShow) pyShow.style.display = 'none';
@@ -2922,11 +3202,34 @@ function switchSubject(subject) {
     if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
     if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
     if (mathC) mathC.style.display = 'none';
+    if (scienceC) scienceC.style.display = 'none';
     if (englishC) { englishC.style.display = 'flex'; renderEnglishMode(); }
+  } else if (subject === 'science') {
+    if (tabChinese) tabChinese.classList.remove('active');
+    if (tabMath) tabMath.classList.remove('active');
+    if (tabEnglish) tabEnglish.classList.remove('active');
+    if (tabScience) tabScience.classList.add('active');
+    if (selectorArea) selectorArea.style.visibility = 'hidden';
+    if (tip) tip.style.display = 'none';
+    if (pyShow) pyShow.style.display = 'none';
+    if (sShow) sShow.style.display = 'none';
+    if (charC) charC.style.display = 'none';
+    if (corrC) corrC.style.display = 'none';
+    if (pyKb) pyKb.style.display = 'none';
+    if (wordC) wordC.style.display = 'none';
+    if (dailyControls) dailyControls.style.display = 'none';
+    if (autoCheckWrap) autoCheckWrap.style.display = 'none';
+    if (rBanner) rBanner.style.display = 'none';
+    if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
+    if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
+    if (mathC) mathC.style.display = 'none';
+    if (englishC) englishC.style.display = 'none';
+    if (scienceC) { scienceC.style.display = 'flex'; renderScienceMode(); }
   } else {
     if (tabChinese) tabChinese.classList.add('active');
     if (tabMath) tabMath.classList.remove('active');
     if (tabEnglish) tabEnglish.classList.remove('active');
+    if (tabScience) tabScience.classList.remove('active');
     if (selectorArea) selectorArea.style.visibility = 'visible';
     if (tip) tip.style.display = 'block';
     if (pyShow) pyShow.style.display = 'block';
@@ -2942,6 +3245,7 @@ function switchSubject(subject) {
     if (rBanner) rBanner.style.display = isReviewMode ? 'flex' : 'none';
     if (mathC) mathC.style.display = 'none';
     if (englishC) englishC.style.display = 'none';
+    if (scienceC) scienceC.style.display = 'none';
     renderWord();
   }
 }
