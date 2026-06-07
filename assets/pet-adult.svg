@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Adult forest pet</title>
+  <desc id="desc">A friendly adult forest spirit with wings, leaf crown, and a polished game icon look.</desc>
+  <defs>
+    <radialGradient id="adultBody" cx="38%" cy="24%" r="78%">
+      <stop offset="0" stop-color="#fff5ad"/>
+      <stop offset=".42" stop-color="#69dca2"/>
+      <stop offset="1" stop-color="#168775"/>
+    </radialGradient>
+    <linearGradient id="adultWing" x1="0" x2="1">
+      <stop offset="0" stop-color="#f1fdff"/>
+      <stop offset=".52" stop-color="#8de3ff"/>
+      <stop offset="1" stop-color="#75b9ff"/>
+    </linearGradient>
+    <linearGradient id="crown" x1="0" x2="1">
+      <stop offset="0" stop-color="#b9f56c"/>
+      <stop offset="1" stop-color="#24b86e"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="120" cy="212" rx="78" ry="14" fill="#5ba88d" opacity=".28"/>
+  <path d="M64 105c-28-23-39-55-30-91 40 9 62 36 69 77Z" fill="url(#crown)" stroke="#197f5d" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M176 105c28-23 39-55 30-91-40 9-62 36-69 77Z" fill="url(#crown)" stroke="#197f5d" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M68 124c-34 5-57 26-67 62 38 10 73-7 95-45Z" fill="url(#adultWing)" stroke="#569fd2" stroke-width="6" opacity=".88"/>
+  <path d="M172 124c34 5 57 26 67 62-38 10-73-7-95-45Z" fill="url(#adultWing)" stroke="#569fd2" stroke-width="6" opacity=".88"/>
+  <path d="M120 46c47 0 78 39 78 88 0 54-31 83-78 83s-78-29-78-83c0-49 31-88 78-88Z" fill="url(#adultBody)" stroke="#176f65" stroke-width="8"/>
+  <path d="M88 48c10-28 33-41 68-38-4 35-25 51-68 38Z" fill="url(#crown)" stroke="#197f5d" stroke-width="7"/>
+  <path d="M108 38c-3-17 4-29 22-38 9 20 4 35-22 38Z" fill="#ffd966" stroke="#d09f2c" stroke-width="5"/>
+  <circle cx="91" cy="129" r="10" fill="#123b40"/>
+  <circle cx="149" cy="129" r="10" fill="#123b40"/>
+  <circle cx="95" cy="125" r="3" fill="#fff"/>
+  <circle cx="153" cy="125" r="3" fill="#fff"/>
+  <path d="M100 160c13 14 36 14 50 0" fill="none" stroke="#123b40" stroke-width="8" stroke-linecap="round"/>
+  <path d="M78 105c11-12 26-16 42-8" fill="none" stroke="#145f56" stroke-width="7" stroke-linecap="round"/>
+  <path d="M162 105c-11-12-26-16-42-8" fill="none" stroke="#145f56" stroke-width="7" stroke-linecap="round"/>
+  <path d="M36 48l6 11 12 4-11 6-5 12-6-11-12-5 11-6 5-11Z" fill="#ffe88a"/>
+  <path d="M199 54l5 9 10 4-9 5-5 10-5-9-10-4 9-5 5-10Z" fill="#ffd0df"/>
+</svg>

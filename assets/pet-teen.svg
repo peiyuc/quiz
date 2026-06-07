@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Teen forest pet</title>
+  <desc id="desc">A taller bright forest spirit with leaf ears and a confident smile.</desc>
+  <defs>
+    <radialGradient id="teenBody" cx="38%" cy="25%" r="76%">
+      <stop offset="0" stop-color="#fff7b8"/>
+      <stop offset=".48" stop-color="#74dcaa"/>
+      <stop offset="1" stop-color="#229c85"/>
+    </radialGradient>
+    <linearGradient id="wing" x1="0" x2="1">
+      <stop offset="0" stop-color="#d8fbff"/>
+      <stop offset="1" stop-color="#81d7ff"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="120" cy="209" rx="73" ry="14" fill="#6ab192" opacity=".3"/>
+  <path d="M59 119c-28-20-39-49-31-81 37 7 58 31 64 68Z" fill="#79dd66" stroke="#208f65" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M181 119c28-20 39-49 31-81-37 7-58 31-64 68Z" fill="#79dd66" stroke="#208f65" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M67 128c-24 8-38 24-43 48 28 5 51-6 68-33Z" fill="url(#wing)" stroke="#58a9d9" stroke-width="5" opacity=".82"/>
+  <path d="M173 128c24 8 38 24 43 48-28 5-51-6-68-33Z" fill="url(#wing)" stroke="#58a9d9" stroke-width="5" opacity=".82"/>
+  <path d="M120 51c44 0 74 38 74 87 0 50-30 78-74 78s-74-28-74-78c0-49 30-87 74-87Z" fill="url(#teenBody)" stroke="#207d70" stroke-width="7"/>
+  <path d="M101 47c9-20 28-29 55-24-6 25-24 36-55 24Z" fill="#48c96e" stroke="#208f65" stroke-width="6"/>
+  <circle cx="91" cy="128" r="10" fill="#163f43"/>
+  <circle cx="149" cy="128" r="10" fill="#163f43"/>
+  <path d="M102 160c12 12 29 12 42 0" fill="none" stroke="#163f43" stroke-width="7" stroke-linecap="round"/>
+  <path d="M83 110c10-10 22-12 34-5" fill="none" stroke="#17655e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M157 110c-10-10-22-12-34-5" fill="none" stroke="#17655e" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="82" cy="151" r="8" fill="#ffb1c7" opacity=".65"/>
+  <circle cx="158" cy="151" r="8" fill="#ffb1c7" opacity=".65"/>
+</svg>

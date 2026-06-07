@@ -958,10 +958,39 @@
       color: #0f172a;
     }
     .pet-stage {
-      text-align: center;
-      font-size: 78px;
-      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 138px;
       padding: 8px 0;
+    }
+    .pet-stage-img {
+      width: min(150px, 60vw);
+      height: min(150px, 60vw);
+      object-fit: contain;
+      filter: drop-shadow(0 12px 14px rgba(15, 23, 42, .14));
+    }
+    .pet-theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pet-theme-btn {
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .pet-theme-btn.active {
+      border-color: #22c55e;
+      background: #ecfdf5;
+      color: #047857;
     }
     .progress-track {
       height: 12px;
@@ -988,6 +1017,22 @@
       padding: 5px 9px;
       font-size: 12px;
       font-weight: bold;
+    }
+    .codex-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 8px;
+      padding: 6px 8px;
+    }
+    .codex-thumb {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+    .codex-pill.locked .codex-thumb {
+      filter: grayscale(1);
+      opacity: .45;
     }
 
     /* ========== 自动批改开关 ========== */
@@ -1302,10 +1347,12 @@
       <div class="pet-grid">
         <div class="pet-panel">
           <div class="mini-title">培育台</div>
-          <div id="petStageIcon" class="pet-stage">◇</div>
+          <div id="petStageIcon" class="pet-stage"><img class="pet-stage-img" src="assets/pet-egg.svg" alt="未孵化的精灵蛋"></div>
           <div id="petStageText" style="font-weight:bold;text-align:center;color:#1e293b;margin-bottom:8px;">暂无精灵</div>
           <div class="progress-track"><div id="petProgressFill" class="progress-fill"></div></div>
           <div id="petProgressText" style="font-size:12px;color:#64748b;text-align:center;margin-top:6px;">购买精灵蛋后开始培育</div>
+          <div class="mini-title" style="margin-top:12px;margin-bottom:0;">精灵形象</div>
+          <div class="pet-theme-grid" id="petThemeGrid"></div>
           <div class="row" style="margin-top:12px;">
             <button class="btn green" onclick="hatchPetEgg()" style="flex:1;font-size:13px;padding:8px 10px;">孵化蛋</button>
           </div>
@@ -1420,10 +1467,43 @@ const SHOP_ITEMS = [
   { id: 'charm', name: '挂件', cost: 10, desc: '精灵外观装饰', dailyLimit: null }
 ];
 const PET_STAGES = [
-  { id: 'egg', name: '精灵蛋', icon: '◇', next: 'child', threshold: 30 },
-  { id: 'child', name: '幼年精灵', icon: '◎', next: 'teen', threshold: 50 },
-  { id: 'teen', name: '青年精灵', icon: '✦', next: 'adult', threshold: 80 },
-  { id: 'adult', name: '成年精灵', icon: '✹', next: null, threshold: 0 }
+  { id: 'egg', name: '精灵蛋', image: 'assets/pet-egg.svg', next: 'child', threshold: 30 },
+  { id: 'child', name: '幼年精灵', image: 'assets/pet-child.svg', next: 'teen', threshold: 50 },
+  { id: 'teen', name: '青年精灵', image: 'assets/pet-teen.svg', next: 'adult', threshold: 80 },
+  { id: 'adult', name: '成年精灵', image: 'assets/pet-adult.svg', next: null, threshold: 0 }
+];
+const PET_STAGE_INDEX = { egg: 0, child: 1, teen: 2, adult: 3 };
+const PET_THEMES = [
+  {
+    id: 'forest',
+    name: '森林系',
+    images: {
+      egg: 'assets/pet-egg.svg',
+      child: 'assets/pet-child.svg',
+      teen: 'assets/pet-teen.svg',
+      adult: 'assets/pet-adult.svg'
+    }
+  },
+  {
+    id: 'ocean',
+    name: '海洋系',
+    images: {
+      egg: 'assets/pet-ocean-egg.svg',
+      child: 'assets/pet-ocean-child.svg',
+      teen: 'assets/pet-ocean-teen.svg',
+      adult: 'assets/pet-ocean-adult.svg'
+    }
+  },
+  {
+    id: 'star',
+    name: '星月系',
+    images: {
+      egg: 'assets/pet-star-egg.svg',
+      child: 'assets/pet-star-child.svg',
+      teen: 'assets/pet-star-teen.svg',
+      adult: 'assets/pet-star-adult.svg'
+    }
+  }
 ];
 const englishLib = [
   { unit: '1', word: 'UK', cn: '英国', aliases: ['uk', 'the uk'] },
@@ -1750,6 +1830,7 @@ function getDefaultPointsState() {
     daily: {},
     monthlyRewards: {},
     purchases: {},
+    petTheme: 'forest',
     inventory: { egg: 0, foodBasic: 0, foodPremium: 0, headwear: 0, cloak: 0, charm: 0 },
     activePet: null,
     unlockedStages: {},
@@ -1763,6 +1844,7 @@ function getPointsState() {
   state.daily = state.daily || {};
   state.monthlyRewards = state.monthlyRewards || {};
   state.purchases = state.purchases || {};
+  state.petTheme = PET_THEMES.some(theme => theme.id === state.petTheme) ? state.petTheme : 'forest';
   state.unlockedStages = state.unlockedStages || {};
   state.ledger = state.ledger || [];
   return state;
@@ -1874,6 +1956,24 @@ function getStageMeta(stageId) {
   return PET_STAGES.find(stage => stage.id === stageId) || PET_STAGES[0];
 }
 
+function getPetTheme(themeId) {
+  return PET_THEMES.find(theme => theme.id === themeId) || PET_THEMES[0];
+}
+
+function getPetVisualHtml(stageId, themeId, className = 'pet-stage-img') {
+  const stage = getStageMeta(stageId);
+  const theme = getPetTheme(themeId);
+  const image = theme.images?.[stage.id] || stage.image;
+  return `<img class="${className}" src="${image}" alt="${theme.name}${stage.name}">`;
+}
+
+function setPetTheme(themeId) {
+  const state = getPointsState();
+  state.petTheme = getPetTheme(themeId).id;
+  savePointsState(state);
+  renderPointsUI();
+}
+
 function grantCodexRewardIfNeeded(state) {
   if (state.codexRewardClaimed) return;
   if (state.unlockedStages.child && state.unlockedStages.teen && state.unlockedStages.adult) {
@@ -1946,6 +2046,8 @@ function renderSubjectCheckins(state) {
       source.innerText = '完成口算每日一练后自动入账';
     } else if (subject.id === 'english') {
       source.innerText = '完成英语每日一练后自动入账';
+    } else if (subject.id === 'science') {
+      source.innerText = '完成科学每日一练后自动入账';
     } else {
       source.innerText = '待接入练习，接入后自动入账';
     }
@@ -2106,21 +2208,38 @@ function renderPetHouse(state) {
   const stageText = document.getElementById('petStageText');
   const fill = document.getElementById('petProgressFill');
   const progressText = document.getElementById('petProgressText');
+  const themeId = getPetTheme(state.petTheme).id;
   if (state.activePet) {
     const stage = getStageMeta(state.activePet.stage);
     const pct = stage.threshold ? Math.min(100, Math.round(state.activePet.progress / stage.threshold * 100)) : 100;
-    if (icon) icon.innerText = stage.icon;
+    if (icon) icon.innerHTML = getPetVisualHtml(stage.id, themeId);
     if (stageText) stageText.innerText = stage.name + (stage.id === 'adult' ? ' · 全装扮已解锁' : '');
     if (fill) fill.style.width = pct + '%';
     if (progressText) progressText.innerText = stage.threshold ? `${state.activePet.progress} / ${stage.threshold}` : '已成年';
   } else {
-    if (icon) icon.innerText = '◇';
+    if (icon) icon.innerHTML = getPetVisualHtml('egg', themeId);
     if (stageText) stageText.innerText = '暂无精灵';
     if (fill) fill.style.width = '0%';
     if (progressText) progressText.innerText = '购买精灵蛋后开始培育';
   }
+  renderPetThemes(state);
   renderInventory(state);
   renderCodex(state);
+}
+
+function renderPetThemes(state) {
+  const grid = document.getElementById('petThemeGrid');
+  if (!grid) return;
+  const currentTheme = getPetTheme(state.petTheme).id;
+  grid.innerHTML = '';
+  PET_THEMES.forEach(theme => {
+    const btn = document.createElement('button');
+    btn.className = 'pet-theme-btn' + (theme.id === currentTheme ? ' active' : '');
+    btn.type = 'button';
+    btn.innerText = theme.name;
+    btn.onclick = () => setPetTheme(theme.id);
+    grid.appendChild(btn);
+  });
 }
 
 function renderInventory(state) {
@@ -2156,8 +2275,9 @@ function renderCodex(state) {
   ['child', 'teen', 'adult'].forEach(stageId => {
     const stage = getStageMeta(stageId);
     const pill = document.createElement('span');
-    pill.className = 'pill';
-    pill.innerText = `${stage.icon} ${stage.name} ${state.unlockedStages[stageId] ? '已解锁' : '未解锁'}`;
+    const unlocked = !!state.unlockedStages[stageId];
+    pill.className = 'pill codex-pill' + (unlocked ? '' : ' locked');
+    pill.innerHTML = `${getPetVisualHtml(stage.id, state.petTheme, 'codex-thumb')}<span>${stage.name} ${unlocked ? '已解锁' : '未解锁'}</span>`;
     list.appendChild(pill);
   });
   if (reward) {

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="海洋系精灵蛋">
+  <defs>
+    <radialGradient id="b" cx="36%" cy="24%" r="74%"><stop offset="0" stop-color="#fff8dc"/><stop offset=".5" stop-color="#8feaff"/><stop offset="1" stop-color="#159bd7"/></radialGradient>
+  </defs>
+  <ellipse cx="120" cy="207" rx="73" ry="14" fill="#4aa6c7" opacity=".28"/>
+  <path d="M52 174c12-24 36-31 57-15 18 14 37 11 55-6 14-13 28-14 39-6-10 42-43 67-83 67-31 0-55-14-68-40Z" fill="#d4f8ff"/>
+  <path d="M120 29c41 0 75 55 75 106 0 48-31 79-75 79s-75-31-75-79c0-51 34-106 75-106Z" fill="url(#b)" stroke="#087eb5" stroke-width="7"/>
+  <path d="M75 151c20 13 36 12 51-3 16-15 33-14 52 2" fill="none" stroke="#e6fbff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M85 109c14-23 35-24 50 0 14 23 35 23 49 0" fill="none" stroke="#1fc4e8" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="86" cy="78" r="9" fill="#64dff4"/>
+  <circle cx="160" cy="96" r="13" fill="#36c5eb"/>
+  <path d="M61 174c-12-17-9-35 8-54 15 18 15 36-8 54Z" fill="#71d8f0" stroke="#1494c4" stroke-width="5"/>
+  <circle cx="183" cy="68" r="5" fill="#bff6ff"/>
+</svg>

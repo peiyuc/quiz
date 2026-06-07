@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="海洋系成年精灵">
+  <defs>
+    <radialGradient id="b" cx="38%" cy="23%" r="78%"><stop offset="0" stop-color="#fffefa"/><stop offset=".42" stop-color="#62e4ff"/><stop offset="1" stop-color="#066f9f"/></radialGradient>
+    <linearGradient id="f" x1="0" x2="1"><stop offset="0" stop-color="#effeff"/><stop offset="1" stop-color="#55cfff"/></linearGradient>
+  </defs>
+  <ellipse cx="120" cy="212" rx="80" ry="14" fill="#2b849f" opacity=".28"/>
+  <path d="M56 102c-34-27-43-61-28-99 38 14 56 45 54 88Z" fill="url(#f)" stroke="#076c9d" stroke-width="7"/>
+  <path d="M184 102c34-27 43-61 28-99-38 14-56 45-54 88Z" fill="url(#f)" stroke="#076c9d" stroke-width="7"/>
+  <path d="M62 127c-36 7-58 29-65 65 39 8 72-9 94-47Z" fill="url(#f)" stroke="#3aaad0" stroke-width="6" opacity=".9"/>
+  <path d="M178 127c36 7 58 29 65 65-39 8-72-9-94-47Z" fill="url(#f)" stroke="#3aaad0" stroke-width="6" opacity=".9"/>
+  <path d="M120 42c49 0 80 40 80 90 0 55-31 85-80 85s-80-30-80-85c0-50 31-90 80-90Z" fill="url(#b)" stroke="#075f8a" stroke-width="8"/>
+  <path d="M92 43c13-31 38-43 73-35-9 38-32 51-73 35Z" fill="#29c7e8" stroke="#076c9d" stroke-width="7"/>
+  <circle cx="90" cy="128" r="10" fill="#10354a"/>
+  <circle cx="150" cy="128" r="10" fill="#10354a"/>
+  <path d="M98 159c15 15 38 15 52 0" fill="none" stroke="#10354a" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="105" cy="86" r="8" fill="#f9e7ff" stroke="#52add0" stroke-width="4"/>
+  <circle cx="124" cy="76" r="9" fill="#fff7c7" stroke="#52add0" stroke-width="4"/>
+  <circle cx="144" cy="88" r="7" fill="#f9e7ff" stroke="#52add0" stroke-width="4"/>
+</svg>
