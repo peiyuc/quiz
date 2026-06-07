@@ -1200,7 +1200,7 @@
       <div class="stat-grid">
         <div class="stat-card"><span>可用积分</span><strong id="availablePointsText">0</strong></div>
         <div class="stat-card"><span>总培育积分</span><strong id="cultivationPointsText">0</strong></div>
-        <div class="stat-card"><span>今日已获</span><strong id="todayPointsText">0 / 8</strong></div>
+        <div class="stat-card"><span>今日已获</span><strong id="todayPointsText">0 / 12</strong></div>
       </div>
       <div>
         <div class="mini-title">今日四科打卡</div>
@@ -1674,7 +1674,7 @@ function addAvailablePoints(state, amount, reason, subjectId = '', capDaily = fa
   const dateStr = getLocalDateString();
   let actual = amount;
   if (capDaily) {
-    actual = Math.max(0, Math.min(amount, 8 - getTodayPointIncome(state, dateStr)));
+    actual = Math.max(0, Math.min(amount, 12 - getTodayPointIncome(state, dateStr)));
   }
   if (actual <= 0) return 0;
   state.availablePoints += actual;
@@ -1719,7 +1719,7 @@ function completeSubjectDaily(subjectId, isPerfect, sourceLabel = '') {
   }
   if (isPerfect && !record.perfect) {
     record.perfect = true;
-    addAvailablePoints(state, 1, `${subjectName}满分奖励`, subjectId, true);
+    addAvailablePoints(state, 2, `${subjectName}满分奖励`, subjectId, true);
     changed = true;
   }
 
@@ -1729,7 +1729,7 @@ function completeSubjectDaily(subjectId, isPerfect, sourceLabel = '') {
   const allPerfect = SUBJECTS.every(s => day[s.id]?.checked && day[s.id]?.perfect);
   if (allPerfect && !day.allPerfectMarked) {
     day.allPerfectMarked = true;
-    addAvailablePoints(state, 4, '四科全部满分奖励（受单日8分封顶限制）', '', true);
+    addAvailablePoints(state, 4, '四科全部满分奖励（受单日12分封顶限制）', '', true);
   }
 
   grantMonthlyRewardIfNeeded(state, subjectId);
@@ -1799,7 +1799,7 @@ function renderPointsUI() {
   const todayEl = document.getElementById('todayPointsText');
   if (availableEl) availableEl.innerText = state.availablePoints;
   if (cultivationEl) cultivationEl.innerText = state.cultivationPoints;
-  if (todayEl) todayEl.innerText = `${todayEarned} / 8`;
+  if (todayEl) todayEl.innerText = `${todayEarned} / 12`;
   renderSubjectCheckins(state);
   renderLedger(state);
   renderShop(state);
