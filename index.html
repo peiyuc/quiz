@@ -94,7 +94,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: 15px;
+      padding: 15px 15px 15px 112px;
       overflow: hidden; /* 防止主容器出现额外滚动条 */
     }
     .left {
@@ -863,11 +863,19 @@
     /* ========== 积分/精灵功能页 ========== */
     .page-nav {
       display: flex;
-      gap: 4px;
+      flex-direction: column;
+      gap: 8px;
+      position: fixed;
+      left: 16px;
+      top: 132px;
+      z-index: 9;
       background: #fff7ed;
       border: 1px solid #fed7aa;
       border-radius: 8px;
-      padding: 4px;
+      padding: 8px;
+      width: 88px;
+      justify-content: center;
+      box-shadow: 0 8px 18px rgba(154, 52, 18, .08);
     }
     .nav-btn {
       border: none;
@@ -877,7 +885,7 @@
       cursor: pointer;
       font-size: 13px;
       font-weight: bold;
-      padding: 8px 10px;
+      padding: 10px 8px;
       white-space: nowrap;
       touch-action: manipulation;
     }
@@ -893,6 +901,26 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
+    }
+    @media (max-width: 600px) {
+      .main {
+        padding: 15px;
+        padding-bottom: 72px;
+      }
+      .page-nav {
+        top: auto;
+        left: 12px;
+        right: 12px;
+        bottom: 10px;
+        width: auto;
+        flex-direction: row;
+        gap: 4px;
+        padding: 5px;
+      }
+      .nav-btn {
+        flex: 1;
+        padding: 9px 6px;
+      }
     }
     .feature-page.show {
       display: flex;
@@ -1099,11 +1127,6 @@
     <button class="tab-btn" id="tabEnglish" onclick="switchSubject('english')">🔤 英语</button>
     <button class="tab-btn" id="tabScience" onclick="switchSubject('science')">🔬 科学</button>
   </div>
-  <div class="page-nav">
-    <button class="nav-btn" id="navPoints" onclick="openFeaturePage('points')">积分中心</button>
-    <button class="nav-btn" id="navPet" onclick="openFeaturePage('pet')">精灵小屋</button>
-    <button class="nav-btn" id="navShop" onclick="openFeaturePage('shop')">积分商城</button>
-  </div>
   <div id="selectorArea">
     <select id="unitSelect">
       <option value="all">全部单元</option>
@@ -1128,6 +1151,12 @@
     </select>
   </div>
 </header>
+
+<div class="page-nav">
+  <button class="nav-btn" id="navPoints" onclick="openFeaturePage('points')">积分中心</button>
+  <button class="nav-btn" id="navPet" onclick="openFeaturePage('pet')">精灵小屋</button>
+  <button class="nav-btn" id="navShop" onclick="openFeaturePage('shop')">积分商城</button>
+</div>
 
 <div class="main">
   <div class="left">
@@ -1632,6 +1661,9 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("scienceStartBtn", "click", startScience);
   safeAddListener("scienceSubmitBtn", "click", submitScience);
   safeAddListener("scienceHistoryBtn", "click", showScienceHistory);
+  safeAddListener("navPoints", "click", function() { openFeaturePage('points'); });
+  safeAddListener("navPet", "click", function() { openFeaturePage('pet'); });
+  safeAddListener("navShop", "click", function() { openFeaturePage('shop'); });
   safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
   safeAddListener("refreshDailyBtn", "click", refreshDailyChinese);
   safeAddListener("addWordBtn", "click", showAddWordModal);
