@@ -789,6 +789,136 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
+    /* ========== 积分/精灵功能页 ========== */
+    .page-nav {
+      display: flex;
+      gap: 4px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .nav-btn {
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #9a3412;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+      padding: 8px 10px;
+      white-space: nowrap;
+      touch-action: manipulation;
+    }
+    .nav-btn.active {
+      background: #f97316;
+      color: #fff;
+    }
+    .feature-page {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+    .feature-page.show {
+      display: flex;
+    }
+    .feature-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .feature-header h2 {
+      font-size: 20px;
+      color: #1e293b;
+    }
+    .stat-grid, .shop-grid, .subject-grid, .pet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+    }
+    .stat-card, .shop-item, .subject-card, .pet-panel, .inventory-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+    }
+    .stat-card strong {
+      display: block;
+      font-size: 26px;
+      color: #0f172a;
+      margin-top: 4px;
+    }
+    .subject-card.done {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+    .subject-card.perfect {
+      border-color: #facc15;
+      background: #fefce8;
+    }
+    .mini-title {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .ledger-list, .inventory-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ledger-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+      color: #475569;
+    }
+    .ledger-item b {
+      color: #0f172a;
+    }
+    .pet-stage {
+      text-align: center;
+      font-size: 78px;
+      line-height: 1.1;
+      padding: 8px 0;
+    }
+    .progress-track {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: #22c55e;
+      transition: width .25s;
+    }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
     /* ========== 自动批改开关 ========== */
     .auto-check-wrap {
       display: flex;
@@ -850,6 +980,11 @@
   <div class="subject-tabs">
     <button class="tab-btn active" id="tabChinese" onclick="switchSubject('chinese')">📖 语文</button>
     <button class="tab-btn" id="tabMath" onclick="switchSubject('math')">🔢 数学</button>
+  </div>
+  <div class="page-nav">
+    <button class="nav-btn" id="navPoints" onclick="openFeaturePage('points')">积分中心</button>
+    <button class="nav-btn" id="navPet" onclick="openFeaturePage('pet')">精灵小屋</button>
+    <button class="nav-btn" id="navShop" onclick="openFeaturePage('shop')">积分商城</button>
   </div>
   <div id="selectorArea">
     <select id="unitSelect">
@@ -1027,6 +1162,62 @@
       <span>📚 错题本已收录 <span id="errCount" class="err-tag">0</span> 道</span>
       <button id="openErrBtn" class="btn blue" style="padding: 6px 14px; font-size: 13px; border-radius: 6px;">打开错题本</button>
     </div>
+
+    <div id="pointsPage" class="feature-page">
+      <div class="feature-header">
+        <h2>积分中心</h2>
+        <button class="btn gray" onclick="switchSubject('chinese')" style="padding:8px 12px;font-size:13px;">返回练习</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><span>可用积分</span><strong id="availablePointsText">0</strong></div>
+        <div class="stat-card"><span>总培育积分</span><strong id="cultivationPointsText">0</strong></div>
+        <div class="stat-card"><span>今日已获</span><strong id="todayPointsText">0 / 8</strong></div>
+      </div>
+      <div>
+        <div class="mini-title">今日四科打卡</div>
+        <div class="subject-grid" id="subjectCheckinGrid"></div>
+      </div>
+      <div>
+        <div class="mini-title">积分明细</div>
+        <div class="ledger-list" id="pointsLedger"></div>
+      </div>
+    </div>
+
+    <div id="petPage" class="feature-page">
+      <div class="feature-header">
+        <h2>精灵小屋</h2>
+        <button class="btn gray" onclick="switchSubject('chinese')" style="padding:8px 12px;font-size:13px;">返回练习</button>
+      </div>
+      <div class="pet-grid">
+        <div class="pet-panel">
+          <div class="mini-title">培育台</div>
+          <div id="petStageIcon" class="pet-stage">◇</div>
+          <div id="petStageText" style="font-weight:bold;text-align:center;color:#1e293b;margin-bottom:8px;">暂无精灵</div>
+          <div class="progress-track"><div id="petProgressFill" class="progress-fill"></div></div>
+          <div id="petProgressText" style="font-size:12px;color:#64748b;text-align:center;margin-top:6px;">购买精灵蛋后开始培育</div>
+          <div class="row" style="margin-top:12px;">
+            <button class="btn green" onclick="hatchPetEgg()" style="flex:1;font-size:13px;padding:8px 10px;">孵化蛋</button>
+          </div>
+        </div>
+        <div class="pet-panel">
+          <div class="mini-title">物品背包</div>
+          <div class="inventory-list" id="inventoryList"></div>
+        </div>
+        <div class="pet-panel">
+          <div class="mini-title">精灵图鉴</div>
+          <div class="pill-row" id="codexList"></div>
+          <div id="codexRewardText" style="font-size:12px;color:#64748b;margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="shopPage" class="feature-page">
+      <div class="feature-header">
+        <h2>积分商城</h2>
+        <button class="btn gray" onclick="switchSubject('chinese')" style="padding:8px 12px;font-size:13px;">返回练习</button>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
   </div>
 </div>
 
@@ -1102,6 +1293,28 @@ let dailyChineseStartTime = null; // 语文每日一练开始时间
 let dailyChineseResults = []; // 语文每日一练每题结果
 let dailyChineseCompleted = false; // 防止完成后重复保存记录
 
+const POINTS_KEY = 'pointsPetStateV1';
+const SUBJECTS = [
+  { id: 'chinese', name: '语文' },
+  { id: 'math', name: '数学' },
+  { id: 'english', name: '英语' },
+  { id: 'science', name: '科学' }
+];
+const SHOP_ITEMS = [
+  { id: 'egg', name: '精灵蛋', cost: 25, desc: '开启孵化培育，1个蛋=1只精灵', dailyLimit: 1 },
+  { id: 'foodBasic', name: '普通口粮', cost: 3, desc: '喂食 +5 培育进度', dailyLimit: 10 },
+  { id: 'foodPremium', name: '高级口粮', cost: 7, desc: '喂食 +15 培育进度', dailyLimit: 5 },
+  { id: 'headwear', name: '头饰', cost: 4, desc: '精灵外观装饰', dailyLimit: null },
+  { id: 'cloak', name: '披风', cost: 7, desc: '精灵外观装饰', dailyLimit: null },
+  { id: 'charm', name: '挂件', cost: 10, desc: '精灵外观装饰', dailyLimit: null }
+];
+const PET_STAGES = [
+  { id: 'egg', name: '精灵蛋', icon: '◇', next: 'child', threshold: 30 },
+  { id: 'child', name: '幼年精灵', icon: '◎', next: 'teen', threshold: 50 },
+  { id: 'teen', name: '青年精灵', icon: '✦', next: 'adult', threshold: 80 },
+  { id: 'adult', name: '成年精灵', icon: '✹', next: null, threshold: 0 }
+];
+
 document.addEventListener("DOMContentLoaded", function(){
   // 安全事件绑定函数：当部分 DOM 元素因延迟加载或特定渲染时返回 null 时，不中断 JavaScript 编译
   function safeAddListener(id, event, handler) {
@@ -1154,7 +1367,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
   // iPad防晃终极拦截器：如果滑动的不是错题弹窗里的列表，则一律阻止页面整体滚动
   document.addEventListener('touchmove', function(e) {
-    if (e.target.closest('#errList, .modal-content, .math-list, .math-history')) {
+    if (e.target.closest('#errList, .modal-content, .math-list, .math-history, .feature-page')) {
       return; // 允许弹窗及数学列表内的正常滑动查看
     }
     e.preventDefault(); // 拦截、锁定主屏幕的晃动和滚动
@@ -1188,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", function(){
     };
   });
 
-  updateLessonSelect(); filterWord(); updateErrCount(); renderErrList();
+  updateLessonSelect(); filterWord(); updateErrCount(); renderErrList(); renderPointsUI();
 });
 
 function updateLessonSelect() {
@@ -1294,6 +1507,431 @@ function getLocalDateString() {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+function getMonthKey(dateStr = getLocalDateString()) {
+  return dateStr.slice(0, 7);
+}
+
+function getDefaultPointsState() {
+  return {
+    availablePoints: 0,
+    cultivationPoints: 0,
+    ledger: [],
+    daily: {},
+    monthlyRewards: {},
+    purchases: {},
+    inventory: { egg: 0, foodBasic: 0, foodPremium: 0, headwear: 0, cloak: 0, charm: 0 },
+    activePet: null,
+    unlockedStages: {},
+    codexRewardClaimed: false
+  };
+}
+
+function getPointsState() {
+  const state = { ...getDefaultPointsState(), ...JSON.parse(localStorage.getItem(POINTS_KEY) || '{}') };
+  state.inventory = { ...getDefaultPointsState().inventory, ...(state.inventory || {}) };
+  state.daily = state.daily || {};
+  state.monthlyRewards = state.monthlyRewards || {};
+  state.purchases = state.purchases || {};
+  state.unlockedStages = state.unlockedStages || {};
+  state.ledger = state.ledger || [];
+  return state;
+}
+
+function savePointsState(state) {
+  localStorage.setItem(POINTS_KEY, JSON.stringify(state));
+}
+
+function getTodayPointIncome(state, dateStr = getLocalDateString()) {
+  return state.ledger
+    .filter(item => item.date === dateStr && item.kind === 'income' && item.capDaily)
+    .reduce((sum, item) => sum + item.amount, 0);
+}
+
+function addLedgerEntry(state, entry) {
+  state.ledger.unshift({
+    id: Date.now() + '-' + Math.random().toString(16).slice(2),
+    time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+    ...entry
+  });
+  state.ledger = state.ledger.slice(0, 120);
+}
+
+function addAvailablePoints(state, amount, reason, subjectId = '', capDaily = false) {
+  const dateStr = getLocalDateString();
+  let actual = amount;
+  if (capDaily) {
+    actual = Math.max(0, Math.min(amount, 8 - getTodayPointIncome(state, dateStr)));
+  }
+  if (actual <= 0) return 0;
+  state.availablePoints += actual;
+  state.cultivationPoints += actual;
+  addLedgerEntry(state, {
+    date: dateStr,
+    kind: 'income',
+    capDaily,
+    amount: actual,
+    reason,
+    subjectId
+  });
+  return actual;
+}
+
+function spendAvailablePoints(state, amount, reason) {
+  if (state.availablePoints < amount) return false;
+  state.availablePoints -= amount;
+  addLedgerEntry(state, {
+    date: getLocalDateString(),
+    kind: 'expense',
+    capDaily: false,
+    amount: -amount,
+    reason,
+    subjectId: ''
+  });
+  return true;
+}
+
+function completeSubjectDaily(subjectId, isPerfect, sourceLabel = '') {
+  const state = getPointsState();
+  const dateStr = getLocalDateString();
+  const day = state.daily[dateStr] || {};
+  const record = day[subjectId] || { checked: false, perfect: false };
+  const subjectName = SUBJECTS.find(s => s.id === subjectId)?.name || subjectId;
+  let changed = false;
+
+  if (!record.checked) {
+    record.checked = true;
+    addAvailablePoints(state, 1, `${subjectName}打卡完成${sourceLabel ? ' · ' + sourceLabel : ''}`, subjectId, true);
+    changed = true;
+  }
+  if (isPerfect && !record.perfect) {
+    record.perfect = true;
+    addAvailablePoints(state, 1, `${subjectName}满分奖励`, subjectId, true);
+    changed = true;
+  }
+
+  day[subjectId] = record;
+  state.daily[dateStr] = day;
+
+  const allPerfect = SUBJECTS.every(s => day[s.id]?.checked && day[s.id]?.perfect);
+  if (allPerfect && !day.allPerfectMarked) {
+    day.allPerfectMarked = true;
+    addAvailablePoints(state, 4, '四科全部满分奖励（受单日8分封顶限制）', '', true);
+  }
+
+  grantMonthlyRewardIfNeeded(state, subjectId);
+  grantCodexRewardIfNeeded(state);
+  savePointsState(state);
+  renderPointsUI();
+  return changed;
+}
+
+function grantMonthlyRewardIfNeeded(state, subjectId) {
+  const monthKey = getMonthKey();
+  const rewardKey = `${monthKey}:${subjectId}`;
+  if (state.monthlyRewards[rewardKey]) return;
+  const checkedDays = Object.keys(state.daily).filter(dateStr => {
+    return dateStr.startsWith(monthKey) && state.daily[dateStr]?.[subjectId]?.checked;
+  }).length;
+  if (checkedDays >= 22) {
+    state.monthlyRewards[rewardKey] = true;
+    const subjectName = SUBJECTS.find(s => s.id === subjectId)?.name || subjectId;
+    addAvailablePoints(state, 12, `${subjectName}月度22天打卡奖励`, subjectId, false);
+  }
+}
+
+function getStageMeta(stageId) {
+  return PET_STAGES.find(stage => stage.id === stageId) || PET_STAGES[0];
+}
+
+function grantCodexRewardIfNeeded(state) {
+  if (state.codexRewardClaimed) return;
+  if (state.unlockedStages.child && state.unlockedStages.teen && state.unlockedStages.adult) {
+    state.codexRewardClaimed = true;
+    addAvailablePoints(state, 6, '精灵图鉴全解锁奖励', '', false);
+  }
+}
+
+function openFeaturePage(page) {
+  hidePracticeViews();
+  document.querySelectorAll('.feature-page').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const pageEl = document.getElementById(page + 'Page');
+  const navEl = document.getElementById('nav' + page.charAt(0).toUpperCase() + page.slice(1));
+  if (pageEl) pageEl.classList.add('show');
+  if (navEl) navEl.classList.add('active');
+  renderPointsUI();
+}
+
+function hidePracticeViews() {
+  const selectorArea = document.getElementById('selectorArea');
+  if (selectorArea) selectorArea.style.visibility = 'hidden';
+  ['reviewBanner', 'mathContainer', 'autoCheckWrap', 'chineseDailyHistory', 'dailyControls', 'wordControls', 'errorWidget', 'pinyinKeyboard', 'sentenceShow', 'pinyinShow', 'correctGrids', 'charContainer', 'tip'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function showPracticeViews() {
+  document.querySelectorAll('.feature-page').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+}
+
+function renderPointsUI() {
+  const state = getPointsState();
+  const today = getLocalDateString();
+  const todayEarned = getTodayPointIncome(state, today);
+  const availableEl = document.getElementById('availablePointsText');
+  const cultivationEl = document.getElementById('cultivationPointsText');
+  const todayEl = document.getElementById('todayPointsText');
+  if (availableEl) availableEl.innerText = state.availablePoints;
+  if (cultivationEl) cultivationEl.innerText = state.cultivationPoints;
+  if (todayEl) todayEl.innerText = `${todayEarned} / 8`;
+  renderSubjectCheckins(state);
+  renderLedger(state);
+  renderShop(state);
+  renderPetHouse(state);
+}
+
+function renderSubjectCheckins(state) {
+  const grid = document.getElementById('subjectCheckinGrid');
+  if (!grid) return;
+  const day = state.daily[getLocalDateString()] || {};
+  grid.innerHTML = '';
+  SUBJECTS.forEach(subject => {
+    const record = day[subject.id] || {};
+    const card = document.createElement('div');
+    card.className = 'subject-card' + (record.checked ? ' done' : '') + (record.perfect ? ' perfect' : '');
+    const title = document.createElement('div');
+    title.style.cssText = 'font-weight:bold;color:#1e293b;margin-bottom:6px;';
+    title.innerText = subject.name;
+    const status = document.createElement('div');
+    status.style.cssText = 'font-size:12px;color:#64748b;margin-bottom:10px;';
+    status.innerText = `${record.checked ? '已打卡' : '未打卡'} · ${record.perfect ? '满分' : '未满分'}`;
+    const source = document.createElement('div');
+    source.style.cssText = 'font-size:12px;color:#94a3b8;line-height:1.4;';
+    if (subject.id === 'chinese') {
+      source.innerText = '完成语文每日一练后自动入账';
+    } else if (subject.id === 'math') {
+      source.innerText = '完成口算每日一练后自动入账';
+    } else {
+      source.innerText = '待接入练习，接入后自动入账';
+    }
+    card.appendChild(title);
+    card.appendChild(status);
+    card.appendChild(source);
+    grid.appendChild(card);
+  });
+}
+
+function renderLedger(state) {
+  const list = document.getElementById('pointsLedger');
+  if (!list) return;
+  list.innerHTML = '';
+  if (state.ledger.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'ledger-item';
+    empty.innerText = '暂无积分记录';
+    list.appendChild(empty);
+    return;
+  }
+  state.ledger.slice(0, 40).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'ledger-item';
+    const left = document.createElement('span');
+    left.innerText = `${item.date} ${item.time || ''} · ${item.reason}`;
+    const right = document.createElement('b');
+    right.innerText = item.amount > 0 ? `+${item.amount}` : String(item.amount);
+    row.appendChild(left);
+    row.appendChild(right);
+    list.appendChild(row);
+  });
+}
+
+function getTodayPurchaseCount(state, itemId) {
+  return state.purchases[getLocalDateString()]?.[itemId] || 0;
+}
+
+function buyShopItem(itemId) {
+  const item = SHOP_ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+  const state = getPointsState();
+  const boughtToday = getTodayPurchaseCount(state, itemId);
+  if (item.dailyLimit && boughtToday >= item.dailyLimit) {
+    alert('今日该商品已达限购数量');
+    return;
+  }
+  if (!spendAvailablePoints(state, item.cost, `购买${item.name}`)) {
+    alert('可用积分不足');
+    return;
+  }
+  state.inventory[itemId] = (state.inventory[itemId] || 0) + 1;
+  const dateStr = getLocalDateString();
+  state.purchases[dateStr] = state.purchases[dateStr] || {};
+  state.purchases[dateStr][itemId] = boughtToday + 1;
+  savePointsState(state);
+  renderPointsUI();
+}
+
+function renderShop(state) {
+  const grid = document.getElementById('shopGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  SHOP_ITEMS.forEach(item => {
+    const boughtToday = getTodayPurchaseCount(state, item.id);
+    const card = document.createElement('div');
+    card.className = 'shop-item';
+    const title = document.createElement('div');
+    title.style.cssText = 'font-weight:bold;color:#1e293b;margin-bottom:6px;';
+    title.innerText = item.name;
+    const desc = document.createElement('div');
+    desc.style.cssText = 'font-size:12px;color:#64748b;min-height:34px;';
+    desc.innerText = item.desc;
+    const meta = document.createElement('div');
+    meta.style.cssText = 'font-size:13px;color:#9a3412;margin:8px 0;font-weight:bold;';
+    meta.innerText = `${item.cost} 积分 · ${item.dailyLimit ? `今日 ${boughtToday}/${item.dailyLimit}` : '不限购'}`;
+    const btn = document.createElement('button');
+    btn.className = 'btn green';
+    btn.style.cssText = 'width:100%;font-size:13px;padding:8px 10px;';
+    btn.innerText = '购买';
+    btn.disabled = !!item.dailyLimit && boughtToday >= item.dailyLimit;
+    btn.onclick = () => buyShopItem(item.id);
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(meta);
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
+function hatchPetEgg() {
+  const state = getPointsState();
+  if (state.activePet) {
+    alert('当前已有正在培育的精灵');
+    return;
+  }
+  if ((state.inventory.egg || 0) <= 0) {
+    alert('背包里还没有精灵蛋，请先去积分商城兑换');
+    return;
+  }
+  state.inventory.egg--;
+  state.activePet = { id: Date.now(), stage: 'egg', progress: 0 };
+  addLedgerEntry(state, {
+    date: getLocalDateString(),
+    kind: 'pet',
+    capDaily: false,
+    amount: 0,
+    reason: '开启精灵蛋孵化',
+    subjectId: ''
+  });
+  savePointsState(state);
+  renderPointsUI();
+}
+
+function feedPet(foodId) {
+  const effect = foodId === 'foodPremium' ? 15 : 5;
+  const state = getPointsState();
+  if (!state.activePet) {
+    alert('还没有正在培育的精灵');
+    return;
+  }
+  if ((state.inventory[foodId] || 0) <= 0) {
+    alert('口粮不足');
+    return;
+  }
+  if (state.activePet.stage === 'adult') {
+    alert('精灵已经成年啦');
+    return;
+  }
+  state.inventory[foodId]--;
+  state.activePet.progress += effect;
+  advancePetStage(state);
+  addLedgerEntry(state, {
+    date: getLocalDateString(),
+    kind: 'pet',
+    capDaily: false,
+    amount: 0,
+    reason: `喂食${foodId === 'foodPremium' ? '高级口粮' : '普通口粮'}，培育进度 +${effect}`,
+    subjectId: ''
+  });
+  grantCodexRewardIfNeeded(state);
+  savePointsState(state);
+  renderPointsUI();
+}
+
+function advancePetStage(state) {
+  while (state.activePet) {
+    const stage = getStageMeta(state.activePet.stage);
+    if (!stage.next || state.activePet.progress < stage.threshold) break;
+    state.activePet.progress -= stage.threshold;
+    state.activePet.stage = stage.next;
+    state.unlockedStages[stage.next] = true;
+  }
+}
+
+function renderPetHouse(state) {
+  const icon = document.getElementById('petStageIcon');
+  const stageText = document.getElementById('petStageText');
+  const fill = document.getElementById('petProgressFill');
+  const progressText = document.getElementById('petProgressText');
+  if (state.activePet) {
+    const stage = getStageMeta(state.activePet.stage);
+    const pct = stage.threshold ? Math.min(100, Math.round(state.activePet.progress / stage.threshold * 100)) : 100;
+    if (icon) icon.innerText = stage.icon;
+    if (stageText) stageText.innerText = stage.name + (stage.id === 'adult' ? ' · 全装扮已解锁' : '');
+    if (fill) fill.style.width = pct + '%';
+    if (progressText) progressText.innerText = stage.threshold ? `${state.activePet.progress} / ${stage.threshold}` : '已成年';
+  } else {
+    if (icon) icon.innerText = '◇';
+    if (stageText) stageText.innerText = '暂无精灵';
+    if (fill) fill.style.width = '0%';
+    if (progressText) progressText.innerText = '购买精灵蛋后开始培育';
+  }
+  renderInventory(state);
+  renderCodex(state);
+}
+
+function renderInventory(state) {
+  const list = document.getElementById('inventoryList');
+  if (!list) return;
+  list.innerHTML = '';
+  const labels = { egg: '精灵蛋', foodBasic: '普通口粮', foodPremium: '高级口粮', headwear: '头饰', cloak: '披风', charm: '挂件' };
+  Object.keys(labels).forEach(id => {
+    const row = document.createElement('div');
+    row.className = 'inventory-item';
+    const title = document.createElement('div');
+    title.style.cssText = 'font-weight:bold;color:#1e293b;margin-bottom:6px;';
+    title.innerText = `${labels[id]} × ${state.inventory[id] || 0}`;
+    row.appendChild(title);
+    if (id === 'foodBasic' || id === 'foodPremium') {
+      const btn = document.createElement('button');
+      btn.className = 'btn blue';
+      btn.style.cssText = 'font-size:12px;padding:7px 10px;';
+      btn.innerText = id === 'foodBasic' ? '喂食 +5' : '喂食 +15';
+      btn.disabled = (state.inventory[id] || 0) <= 0;
+      btn.onclick = () => feedPet(id);
+      row.appendChild(btn);
+    }
+    list.appendChild(row);
+  });
+}
+
+function renderCodex(state) {
+  const list = document.getElementById('codexList');
+  const reward = document.getElementById('codexRewardText');
+  if (!list) return;
+  list.innerHTML = '';
+  ['child', 'teen', 'adult'].forEach(stageId => {
+    const stage = getStageMeta(stageId);
+    const pill = document.createElement('span');
+    pill.className = 'pill';
+    pill.innerText = `${stage.icon} ${stage.name} ${state.unlockedStages[stageId] ? '已解锁' : '未解锁'}`;
+    list.appendChild(pill);
+  });
+  if (reward) {
+    reward.innerText = state.codexRewardClaimed ? '全图鉴奖励 6 积分已领取' : '解锁幼年/青年/成年三种形象后，自动奖励 6 可用积分';
+  }
 }
 
 function filterWord() {
@@ -1523,6 +2161,7 @@ function checkAnswer(){
           words: dailyChineseQuestions.map(q => q.word)
         });
         localStorage.setItem('chineseDailyRecords', JSON.stringify(records.slice(0, 30)));
+        completeSubjectDaily('chinese', correct === 10, '语文每日一练');
       }
     }
   } else {
@@ -1909,6 +2548,7 @@ function submitMath() {
     time: elapsed
   });
   localStorage.setItem('mathDailyRecords', JSON.stringify(records.slice(0, 30)));
+  completeSubjectDaily('math', correct === MATH_COUNT, '口算每日一练');
 }
 
 function showMathHistory() {
@@ -1965,6 +2605,7 @@ function showChineseDailyHistory() {
 
 // ========== 学科切换 ==========
 function switchSubject(subject) {
+  showPracticeViews();
   const tabChinese = document.getElementById('tabChinese');
   const tabMath = document.getElementById('tabMath');
   const selectorArea = document.getElementById('selectorArea');
