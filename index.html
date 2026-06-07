@@ -1347,7 +1347,7 @@
       <div class="pet-grid">
         <div class="pet-panel">
           <div class="mini-title">培育台</div>
-          <div id="petStageIcon" class="pet-stage"><img class="pet-stage-img" src="assets/pet-egg.svg" alt="未孵化的精灵蛋"></div>
+          <div id="petStageIcon" class="pet-stage"><img class="pet-stage-img" src="assets/pet-forest-egg.png" alt="未孵化的精灵蛋"></div>
           <div id="petStageText" style="font-weight:bold;text-align:center;color:#1e293b;margin-bottom:8px;">暂无精灵</div>
           <div class="progress-track"><div id="petProgressFill" class="progress-fill"></div></div>
           <div id="petProgressText" style="font-size:12px;color:#64748b;text-align:center;margin-top:6px;">购买精灵蛋后开始培育</div>
@@ -1467,10 +1467,10 @@ const SHOP_ITEMS = [
   { id: 'charm', name: '挂件', cost: 10, desc: '精灵外观装饰', dailyLimit: null }
 ];
 const PET_STAGES = [
-  { id: 'egg', name: '精灵蛋', image: 'assets/pet-egg.svg', next: 'child', threshold: 30 },
-  { id: 'child', name: '幼年精灵', image: 'assets/pet-child.svg', next: 'teen', threshold: 50 },
-  { id: 'teen', name: '青年精灵', image: 'assets/pet-teen.svg', next: 'adult', threshold: 80 },
-  { id: 'adult', name: '成年精灵', image: 'assets/pet-adult.svg', next: null, threshold: 0 }
+  { id: 'egg', name: '精灵蛋', image: 'assets/pet-forest-egg.png', next: 'child', threshold: 30 },
+  { id: 'child', name: '幼年精灵', image: 'assets/pet-forest-child.png', next: 'teen', threshold: 50 },
+  { id: 'teen', name: '青年精灵', image: 'assets/pet-forest-teen.png', next: 'adult', threshold: 80 },
+  { id: 'adult', name: '成年精灵', image: 'assets/pet-forest-adult.png', next: null, threshold: 0 }
 ];
 const PET_STAGE_INDEX = { egg: 0, child: 1, teen: 2, adult: 3 };
 const PET_THEMES = [
@@ -1478,30 +1478,30 @@ const PET_THEMES = [
     id: 'forest',
     name: '森林系',
     images: {
-      egg: 'assets/pet-egg.svg',
-      child: 'assets/pet-child.svg',
-      teen: 'assets/pet-teen.svg',
-      adult: 'assets/pet-adult.svg'
+      egg: 'assets/pet-forest-egg.png',
+      child: 'assets/pet-forest-child.png',
+      teen: 'assets/pet-forest-teen.png',
+      adult: 'assets/pet-forest-adult.png'
     }
   },
   {
     id: 'ocean',
     name: '海洋系',
     images: {
-      egg: 'assets/pet-ocean-egg.svg',
-      child: 'assets/pet-ocean-child.svg',
-      teen: 'assets/pet-ocean-teen.svg',
-      adult: 'assets/pet-ocean-adult.svg'
+      egg: 'assets/pet-ocean-egg.png',
+      child: 'assets/pet-ocean-child.png',
+      teen: 'assets/pet-ocean-teen.png',
+      adult: 'assets/pet-ocean-adult.png'
     }
   },
   {
     id: 'star',
     name: '星月系',
     images: {
-      egg: 'assets/pet-star-egg.svg',
-      child: 'assets/pet-star-child.svg',
-      teen: 'assets/pet-star-teen.svg',
-      adult: 'assets/pet-star-adult.svg'
+      egg: 'assets/pet-star-egg.png',
+      child: 'assets/pet-star-child.png',
+      teen: 'assets/pet-star-teen.png',
+      adult: 'assets/pet-star-adult.png'
     }
   }
 ];
