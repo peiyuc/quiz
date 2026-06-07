@@ -723,6 +723,15 @@
     .math-item.wrong .math-ans {
       display: inline;
     }
+    .english-item .math-q {
+      min-width: 150px;
+    }
+    .english-item .math-input {
+      width: 150px;
+      text-align: left;
+      padding: 0 10px;
+      font-size: 16px;
+    }
     .math-result {
       display: none;
       background: #f0fdf4;
@@ -980,6 +989,7 @@
   <div class="subject-tabs">
     <button class="tab-btn active" id="tabChinese" onclick="switchSubject('chinese')">📖 语文</button>
     <button class="tab-btn" id="tabMath" onclick="switchSubject('math')">🔢 数学</button>
+    <button class="tab-btn" id="tabEnglish" onclick="switchSubject('english')">🔤 英语</button>
   </div>
   <div class="page-nav">
     <button class="nav-btn" id="navPoints" onclick="openFeaturePage('points')">积分中心</button>
@@ -1128,6 +1138,25 @@
         <button id="mathHistoryBtn" class="btn gray" style="flex:1">历史记录</button>
       </div>
       <div class="math-history" id="mathHistory"></div>
+    </div>
+
+    <!-- 英语每日一练 -->
+    <div id="englishContainer" class="math-container">
+      <div class="math-header">
+        <span class="math-date" id="englishDate">英语每日一练</span>
+        <span class="math-timer" id="englishTimer">00:00</span>
+      </div>
+      <div class="math-list" id="englishList"></div>
+      <div class="math-result" id="englishResult">
+        <h3>🎉 完成！</h3>
+        <p id="englishScoreText"></p>
+      </div>
+      <div class="row" id="englishControls">
+        <button id="englishStartBtn" class="btn green" style="flex:1">开始练习</button>
+        <button id="englishSubmitBtn" class="btn blue" style="flex:1;display:none">交卷</button>
+        <button id="englishHistoryBtn" class="btn gray" style="flex:1">历史记录</button>
+      </div>
+      <div class="math-history" id="englishHistory"></div>
     </div>
 
     <!-- 自动批改开关 + 语文历史记录 -->
@@ -1314,6 +1343,60 @@ const PET_STAGES = [
   { id: 'teen', name: '青年精灵', icon: '✦', next: 'adult', threshold: 80 },
   { id: 'adult', name: '成年精灵', icon: '✹', next: null, threshold: 0 }
 ];
+const englishLib = [
+  { unit: '1', word: 'UK', cn: '英国', aliases: ['uk', 'the uk'] },
+  { unit: '1', word: 'Canada', cn: '加拿大', aliases: ['canada'] },
+  { unit: '1', word: 'USA', cn: '美国', aliases: ['usa', 'the usa'] },
+  { unit: '1', word: 'China', cn: '中国', aliases: ['china'] },
+  { unit: '1', word: 'pupil', cn: '小学生', aliases: ['pupil'] },
+  { unit: '1', word: 'teacher', cn: '教师', aliases: ['teacher'] },
+  { unit: '1', word: 'student', cn: '学生', aliases: ['student'] },
+  { unit: '1', word: 'he', cn: '他', aliases: ['he'] },
+  { unit: '1', word: 'she', cn: '她', aliases: ['she'] },
+  { unit: '2', word: 'father', cn: '父亲', aliases: ['father', 'dad'] },
+  { unit: '2', word: 'mother', cn: '母亲', aliases: ['mother', 'mum', 'mom'] },
+  { unit: '2', word: 'man', cn: '男人', aliases: ['man'] },
+  { unit: '2', word: 'woman', cn: '女人', aliases: ['woman'] },
+  { unit: '2', word: 'brother', cn: '兄；弟', aliases: ['brother'] },
+  { unit: '2', word: 'sister', cn: '姐；妹', aliases: ['sister'] },
+  { unit: '2', word: 'family', cn: '家庭', aliases: ['family'] },
+  { unit: '3', word: 'thin', cn: '瘦的', aliases: ['thin'] },
+  { unit: '3', word: 'fat', cn: '胖的', aliases: ['fat'] },
+  { unit: '3', word: 'tall', cn: '高的', aliases: ['tall'] },
+  { unit: '3', word: 'short', cn: '矮的；短的', aliases: ['short'] },
+  { unit: '3', word: 'long', cn: '长的', aliases: ['long'] },
+  { unit: '3', word: 'small', cn: '小的', aliases: ['small'] },
+  { unit: '3', word: 'big', cn: '大的', aliases: ['big'] },
+  { unit: '3', word: 'giraffe', cn: '长颈鹿', aliases: ['giraffe'] },
+  { unit: '4', word: 'on', cn: '在……上', aliases: ['on'] },
+  { unit: '4', word: 'in', cn: '在……里', aliases: ['in'] },
+  { unit: '4', word: 'under', cn: '在……下面', aliases: ['under'] },
+  { unit: '4', word: 'chair', cn: '椅子', aliases: ['chair'] },
+  { unit: '4', word: 'desk', cn: '课桌', aliases: ['desk'] },
+  { unit: '4', word: 'cap', cn: '帽子', aliases: ['cap'] },
+  { unit: '4', word: 'ball', cn: '球', aliases: ['ball'] },
+  { unit: '4', word: 'car', cn: '小汽车', aliases: ['car'] },
+  { unit: '4', word: 'boat', cn: '小船', aliases: ['boat'] },
+  { unit: '4', word: 'map', cn: '地图', aliases: ['map'] },
+  { unit: '5', word: 'pear', cn: '梨', aliases: ['pear'] },
+  { unit: '5', word: 'apple', cn: '苹果', aliases: ['apple'] },
+  { unit: '5', word: 'orange', cn: '橙子', aliases: ['orange'] },
+  { unit: '5', word: 'banana', cn: '香蕉', aliases: ['banana'] },
+  { unit: '5', word: 'watermelon', cn: '西瓜', aliases: ['watermelon'] },
+  { unit: '5', word: 'strawberry', cn: '草莓', aliases: ['strawberry'] },
+  { unit: '5', word: 'grape', cn: '葡萄', aliases: ['grape'] },
+  { unit: '5', word: 'fruit', cn: '水果', aliases: ['fruit'] },
+  { unit: '6', word: 'eleven', cn: '十一', aliases: ['eleven'] },
+  { unit: '6', word: 'twelve', cn: '十二', aliases: ['twelve'] },
+  { unit: '6', word: 'thirteen', cn: '十三', aliases: ['thirteen'] },
+  { unit: '6', word: 'fourteen', cn: '十四', aliases: ['fourteen'] },
+  { unit: '6', word: 'fifteen', cn: '十五', aliases: ['fifteen'] },
+  { unit: '6', word: 'sixteen', cn: '十六', aliases: ['sixteen'] },
+  { unit: '6', word: 'seventeen', cn: '十七', aliases: ['seventeen'] },
+  { unit: '6', word: 'eighteen', cn: '十八', aliases: ['eighteen'] },
+  { unit: '6', word: 'nineteen', cn: '十九', aliases: ['nineteen'] },
+  { unit: '6', word: 'twenty', cn: '二十', aliases: ['twenty'] }
+];
 
 document.addEventListener("DOMContentLoaded", function(){
   // 安全事件绑定函数：当部分 DOM 元素因延迟加载或特定渲染时返回 null 时，不中断 JavaScript 编译
@@ -1349,6 +1432,9 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("mathStartBtn", "click", startMath);
   safeAddListener("mathSubmitBtn", "click", submitMath);
   safeAddListener("mathHistoryBtn", "click", showMathHistory);
+  safeAddListener("englishStartBtn", "click", startEnglish);
+  safeAddListener("englishSubmitBtn", "click", submitEnglish);
+  safeAddListener("englishHistoryBtn", "click", showEnglishHistory);
   safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
   safeAddListener("refreshDailyBtn", "click", refreshDailyChinese);
   safeAddListener("addWordBtn", "click", showAddWordModal);
@@ -1374,6 +1460,25 @@ document.addEventListener("DOMContentLoaded", function(){
   }, { passive: false });
 
   // Apple Pencil 在 iPad Safari 中偶尔只触发 pointer 事件，主动补一次聚焦/点击。
+  function focusPencilTarget(target) {
+    if (!target || target.disabled) return;
+    const safeFocus = function(el) {
+      try {
+        el.focus({ preventScroll: true });
+      } catch (err) {
+        el.focus();
+      }
+    };
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      safeFocus(target);
+      if (target.classList.contains('pinyin-input')) activeInput = target;
+      const len = target.value ? target.value.length : 0;
+      if (target.setSelectionRange) target.setSelectionRange(len, len);
+    } else if (target.tagName === 'SELECT') {
+      safeFocus(target);
+    }
+  }
+
   let pendingPenClick = null;
   document.addEventListener('click', function(e) {
     if (!pendingPenClick) return;
@@ -1383,14 +1488,21 @@ document.addEventListener("DOMContentLoaded", function(){
     }
   }, true);
 
+  document.addEventListener('pointerdown', function(e) {
+    if (e.pointerType !== 'pen') return;
+    const target = e.target.closest('input, textarea, select');
+    focusPencilTarget(target);
+  }, true);
+
   document.addEventListener('pointerup', function(e) {
     if (e.pointerType !== 'pen') return;
     const target = e.target.closest('input, textarea, button, label, select');
     if (!target || target.disabled) return;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
-      target.focus();
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      focusPencilTarget(target);
       return;
     }
+    if (target.tagName === 'SELECT') focusPencilTarget(target);
     if (pendingPenClick) clearTimeout(pendingPenClick.timer);
     pendingPenClick = {
       target,
@@ -1667,7 +1779,7 @@ function openFeaturePage(page) {
 function hidePracticeViews() {
   const selectorArea = document.getElementById('selectorArea');
   if (selectorArea) selectorArea.style.visibility = 'hidden';
-  ['reviewBanner', 'mathContainer', 'autoCheckWrap', 'chineseDailyHistory', 'dailyControls', 'wordControls', 'errorWidget', 'pinyinKeyboard', 'sentenceShow', 'pinyinShow', 'correctGrids', 'charContainer', 'tip'].forEach(id => {
+  ['reviewBanner', 'mathContainer', 'englishContainer', 'autoCheckWrap', 'chineseDailyHistory', 'dailyControls', 'wordControls', 'errorWidget', 'pinyinKeyboard', 'sentenceShow', 'pinyinShow', 'correctGrids', 'charContainer', 'tip'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -1715,6 +1827,8 @@ function renderSubjectCheckins(state) {
       source.innerText = '完成语文每日一练后自动入账';
     } else if (subject.id === 'math') {
       source.innerText = '完成口算每日一练后自动入账';
+    } else if (subject.id === 'english') {
+      source.innerText = '完成英语每日一练后自动入账';
     } else {
       source.innerText = '待接入练习，接入后自动入账';
     }
@@ -1977,6 +2091,7 @@ function renderWord(){
   const corrC = document.getElementById("correctGrids");
   const pyKb = document.getElementById("pinyinKeyboard");
   const mathC = document.getElementById("mathContainer");
+  const englishC = document.getElementById("englishContainer");
   const wordC = document.getElementById("wordControls");
   const tip = document.getElementById("tip");
   const errW = document.querySelector(".error-widget");
@@ -1988,6 +2103,7 @@ function renderWord(){
 
   // 字词模式：隐藏口算，显示字词
   if (mathC) mathC.style.display = "none";
+  if (englishC) englishC.style.display = "none";
   if (wordC) wordC.style.display = "flex";
   if (tip) tip.style.display = "block";
   if (errW) errW.style.display = "flex";
@@ -2390,6 +2506,10 @@ const MATH_COUNT = 20;
 let mathQuestions = [];
 let mathStartTime = null;
 let mathTimerInterval = null;
+const ENGLISH_COUNT = 10;
+let englishQuestions = [];
+let englishStartTime = null;
+let englishTimerInterval = null;
 
 function seededRandom(seed) {
   let x = Math.sin(seed++) * 10000;
@@ -2433,6 +2553,17 @@ function generateDailyMath() {
     questions.push({ q: `${a} ÷ ${b} =`, a: a / b, type: 'div' });
   }
   return questions;
+}
+
+function generateDailyEnglish() {
+  const seedBase = getTodaySeed();
+  return [...englishLib]
+    .sort((a, b) => seededRandom(seedBase + a.word.charCodeAt(0)) - seededRandom(seedBase + b.word.charCodeAt(0)))
+    .slice(0, ENGLISH_COUNT);
+}
+
+function normalizeEnglishAnswer(value) {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 function formatTime(seconds) {
@@ -2577,6 +2708,132 @@ function showMathHistory() {
   });
 }
 
+function renderEnglishMode() {
+  const container = document.getElementById('englishContainer');
+  const list = document.getElementById('englishList');
+  const result = document.getElementById('englishResult');
+  const startBtn = document.getElementById('englishStartBtn');
+  const submitBtn = document.getElementById('englishSubmitBtn');
+  const timer = document.getElementById('englishTimer');
+  const dateEl = document.getElementById('englishDate');
+
+  if (!container) return;
+
+  const d = new Date();
+  if (dateEl) dateEl.innerText = `英语每日一练 · ${d.getMonth()+1}月${d.getDate()}日`;
+
+  container.style.display = 'flex';
+  if (list) list.innerHTML = '';
+  if (result) result.classList.remove('show');
+  if (startBtn) { startBtn.style.display = 'inline-flex'; startBtn.innerText = '开始练习'; }
+  if (submitBtn) submitBtn.style.display = 'none';
+  if (timer) timer.innerText = '00:00';
+
+  if (englishTimerInterval) {
+    clearInterval(englishTimerInterval);
+    englishTimerInterval = null;
+  }
+}
+
+function startEnglish() {
+  const list = document.getElementById('englishList');
+  const startBtn = document.getElementById('englishStartBtn');
+  const submitBtn = document.getElementById('englishSubmitBtn');
+  const result = document.getElementById('englishResult');
+
+  englishQuestions = generateDailyEnglish();
+  if (list) list.innerHTML = '';
+  if (result) result.classList.remove('show');
+
+  englishQuestions.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'math-item english-item';
+    div.innerHTML = `<span class="math-q">${idx + 1}. ${item.cn}</span><input type="text" class="math-input" id="english-${idx}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span class="math-ans">答案: ${item.word}</span>`;
+    if (list) list.appendChild(div);
+  });
+
+  if (startBtn) startBtn.style.display = 'none';
+  if (submitBtn) submitBtn.style.display = 'inline-flex';
+
+  englishStartTime = Date.now();
+  englishTimerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - englishStartTime) / 1000);
+    const timer = document.getElementById('englishTimer');
+    if (timer) timer.innerText = formatTime(elapsed);
+  }, 1000);
+}
+
+function submitEnglish() {
+  if (englishTimerInterval) {
+    clearInterval(englishTimerInterval);
+    englishTimerInterval = null;
+  }
+
+  const elapsed = Math.floor((Date.now() - englishStartTime) / 1000);
+  let correct = 0;
+
+  englishQuestions.forEach((item, idx) => {
+    const input = document.getElementById(`english-${idx}`);
+    if (!input) return;
+    const div = input.parentElement;
+    const val = normalizeEnglishAnswer(input.value);
+    const answers = (item.aliases || [item.word]).map(normalizeEnglishAnswer);
+    if (answers.includes(val)) {
+      div.classList.add('correct');
+      correct++;
+    } else {
+      div.classList.add('wrong');
+      input.disabled = true;
+    }
+  });
+
+  const scoreText = document.getElementById('englishScoreText');
+  if (scoreText) scoreText.innerHTML = `答对 <b>${correct}/${ENGLISH_COUNT}</b> 题，用时 <b>${formatTime(elapsed)}</b>`;
+  const result = document.getElementById('englishResult');
+  if (result) result.classList.add('show');
+  const submitBtn = document.getElementById('englishSubmitBtn');
+  if (submitBtn) submitBtn.style.display = 'none';
+  const startBtn = document.getElementById('englishStartBtn');
+  if (startBtn) { startBtn.style.display = 'inline-flex'; startBtn.innerText = '再来一组'; }
+
+  const records = JSON.parse(localStorage.getItem('englishDailyRecords') || '[]');
+  records.unshift({
+    date: getLocalDateString(),
+    correct,
+    total: ENGLISH_COUNT,
+    time: elapsed,
+    words: englishQuestions.map(q => q.word)
+  });
+  localStorage.setItem('englishDailyRecords', JSON.stringify(records.slice(0, 30)));
+  completeSubjectDaily('english', correct === ENGLISH_COUNT, '英语每日一练');
+}
+
+function showEnglishHistory() {
+  const history = document.getElementById('englishHistory');
+  const records = JSON.parse(localStorage.getItem('englishDailyRecords') || '[]');
+
+  if (!history) return;
+  if (history.classList.contains('show')) {
+    history.classList.remove('show');
+    history.innerHTML = '';
+    return;
+  }
+
+  history.classList.add('show');
+  if (records.length === 0) {
+    history.innerHTML = '<div class="math-history-item" style="color:#94a3b8;text-align:center;">暂无记录</div>';
+    return;
+  }
+
+  history.innerHTML = '<div style="font-weight:bold;color:#64748b;margin-bottom:6px;font-size:13px;">最近记录</div>';
+  records.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'math-history-item';
+    div.innerHTML = `<span>${r.date}</span><span><b>${r.correct}/${r.total}</b> 题 · ${formatTime(r.time)}</span>`;
+    history.appendChild(div);
+  });
+}
+
 function showChineseDailyHistory() {
   const history = document.getElementById('chineseDailyHistory');
   const records = JSON.parse(localStorage.getItem('chineseDailyRecords') || '[]');
@@ -2608,8 +2865,10 @@ function switchSubject(subject) {
   showPracticeViews();
   const tabChinese = document.getElementById('tabChinese');
   const tabMath = document.getElementById('tabMath');
+  const tabEnglish = document.getElementById('tabEnglish');
   const selectorArea = document.getElementById('selectorArea');
   const mathC = document.getElementById('mathContainer');
+  const englishC = document.getElementById('englishContainer');
   const wordC = document.getElementById('wordControls');
   const tip = document.getElementById('tip');
   const pyShow = document.getElementById('pinyinShow');
@@ -2628,6 +2887,7 @@ function switchSubject(subject) {
   if (subject === 'math') {
     if (tabChinese) tabChinese.classList.remove('active');
     if (tabMath) tabMath.classList.add('active');
+    if (tabEnglish) tabEnglish.classList.remove('active');
     if (selectorArea) selectorArea.style.visibility = 'hidden';
     if (tip) tip.style.display = 'none';
     if (pyShow) pyShow.style.display = 'none';
@@ -2642,10 +2902,31 @@ function switchSubject(subject) {
     if (rBanner) rBanner.style.display = 'none';
     if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
     if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
+    if (englishC) englishC.style.display = 'none';
     if (mathC) { mathC.style.display = 'flex'; renderMathMode(); }
+  } else if (subject === 'english') {
+    if (tabChinese) tabChinese.classList.remove('active');
+    if (tabMath) tabMath.classList.remove('active');
+    if (tabEnglish) tabEnglish.classList.add('active');
+    if (selectorArea) selectorArea.style.visibility = 'hidden';
+    if (tip) tip.style.display = 'none';
+    if (pyShow) pyShow.style.display = 'none';
+    if (sShow) sShow.style.display = 'none';
+    if (charC) charC.style.display = 'none';
+    if (corrC) corrC.style.display = 'none';
+    if (pyKb) pyKb.style.display = 'none';
+    if (wordC) wordC.style.display = 'none';
+    if (dailyControls) dailyControls.style.display = 'none';
+    if (autoCheckWrap) autoCheckWrap.style.display = 'none';
+    if (rBanner) rBanner.style.display = 'none';
+    if (chineseHistoryBtn) chineseHistoryBtn.style.display = 'none';
+    if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
+    if (mathC) mathC.style.display = 'none';
+    if (englishC) { englishC.style.display = 'flex'; renderEnglishMode(); }
   } else {
     if (tabChinese) tabChinese.classList.add('active');
     if (tabMath) tabMath.classList.remove('active');
+    if (tabEnglish) tabEnglish.classList.remove('active');
     if (selectorArea) selectorArea.style.visibility = 'visible';
     if (tip) tip.style.display = 'block';
     if (pyShow) pyShow.style.display = 'block';
@@ -2660,6 +2941,7 @@ function switchSubject(subject) {
     if (!isDailyChinese && chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
     if (rBanner) rBanner.style.display = isReviewMode ? 'flex' : 'none';
     if (mathC) mathC.style.display = 'none';
+    if (englishC) englishC.style.display = 'none';
     renderWord();
   }
 }
