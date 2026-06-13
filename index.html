@@ -1423,7 +1423,7 @@
       <div class="stat-grid">
         <div class="stat-card"><span>可用积分</span><strong id="availablePointsText">0</strong></div>
         <div class="stat-card"><span>总培育积分</span><strong id="cultivationPointsText">0</strong></div>
-        <div class="stat-card"><span>今日已获</span><strong id="todayPointsText">0 / 12</strong></div>
+        <div class="stat-card"><span>今日已获</span><strong id="todayPointsText">0 / 20</strong></div>
       </div>
       <div>
         <div class="mini-title">手动加分</div>
@@ -1986,6 +1986,12 @@ function getTodayPointIncome(state, dateStr = getLocalDateString()) {
     .reduce((sum, item) => sum + item.amount, 0);
 }
 
+function getTodayTotalIncome(state, dateStr = getLocalDateString()) {
+  return state.ledger
+    .filter(item => item.date === dateStr && item.kind === 'income')
+    .reduce((sum, item) => sum + item.amount, 0);
+}
+
 function addLedgerEntry(state, entry) {
   state.ledger.unshift({
     id: Date.now() + '-' + Math.random().toString(16).slice(2),
@@ -2097,16 +2103,32 @@ function completeSubjectDaily(subjectId, isPerfect, sourceLabel = '') {
   const day = state.daily[dateStr] || {};
   const record = day[subjectId] || { checked: false, perfect: false };
   const subjectName = SUBJECTS.find(s => s.id === subjectId)?.name || subjectId;
+  record.attempts = Math.max(0, Number(record.attempts || 0));
+  record.extraPerfectRewards = Math.max(0, Number(record.extraPerfectRewards || 0));
   let changed = false;
 
-  if (!record.checked) {
+  if (record.attempts >= 3) {
+    day[subjectId] = record;
+    state.daily[dateStr] = day;
+    savePointsState(state);
+    renderPointsUI();
+    return false;
+  }
+
+  record.attempts++;
+
+  if (record.attempts === 1 && !record.checked) {
     record.checked = true;
     addAvailablePoints(state, 1, `${subjectName}打卡完成${sourceLabel ? ' · ' + sourceLabel : ''}`, subjectId, true);
     changed = true;
   }
-  if (isPerfect && !record.perfect) {
+  if (record.attempts === 1 && isPerfect && !record.perfect) {
     record.perfect = true;
     addAvailablePoints(state, 2, `${subjectName}满分奖励`, subjectId, true);
+    changed = true;
+  } else if (record.attempts > 1 && isPerfect) {
+    record.extraPerfectRewards++;
+    addAvailablePoints(state, 1, `${subjectName}第${record.attempts}次每日一练全对奖励`, subjectId, false);
     changed = true;
   }
 
@@ -2116,7 +2138,7 @@ function completeSubjectDaily(subjectId, isPerfect, sourceLabel = '') {
   const allPerfect = SUBJECTS.every(s => day[s.id]?.checked && day[s.id]?.perfect);
   if (allPerfect && !day.allPerfectMarked) {
     day.allPerfectMarked = true;
-    addAvailablePoints(state, 4, '四科全部满分奖励（受单日12分封顶限制）', '', true);
+    addAvailablePoints(state, 4, '四科全部满分奖励（首次练习受单日12分封顶限制）', '', true);
   }
 
   grantMonthlyRewardIfNeeded(state, subjectId);
@@ -2231,13 +2253,13 @@ function showPracticeViews() {
 function renderPointsUI() {
   const state = getPointsState();
   const today = getLocalDateString();
-  const todayEarned = getTodayPointIncome(state, today);
+  const todayEarned = getTodayTotalIncome(state, today);
   const availableEl = document.getElementById('availablePointsText');
   const cultivationEl = document.getElementById('cultivationPointsText');
   const todayEl = document.getElementById('todayPointsText');
   if (availableEl) availableEl.innerText = state.availablePoints;
   if (cultivationEl) cultivationEl.innerText = state.cultivationPoints;
-  if (todayEl) todayEl.innerText = `${todayEarned} / 12`;
+  if (todayEl) todayEl.innerText = `${todayEarned} / 20`;
   renderSubjectCheckins(state);
   renderLedger(state);
   renderShop(state);
@@ -2258,7 +2280,7 @@ function renderSubjectCheckins(state) {
     title.innerText = subject.name;
     const status = document.createElement('div');
     status.style.cssText = 'font-size:12px;color:#64748b;margin-bottom:10px;';
-    status.innerText = `${record.checked ? '已打卡' : '未打卡'} · ${record.perfect ? '满分' : '未满分'}`;
+    status.innerText = `${record.checked ? '已打卡' : '未打卡'} · ${record.perfect ? '满分' : '未满分'} · 今日 ${record.attempts || 0}/3 次`;
     const source = document.createElement('div');
     source.style.cssText = 'font-size:12px;color:#94a3b8;line-height:1.4;';
     if (subject.id === 'chinese') {
