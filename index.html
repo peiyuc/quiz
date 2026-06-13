@@ -954,6 +954,45 @@
       color: #0f172a;
       margin-top: 4px;
     }
+    .manual-points-form {
+      display: grid;
+      grid-template-columns: 110px 1fr 110px auto;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 10px;
+    }
+    .manual-points-form input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      color: #1e293b;
+      font-size: 14px;
+      padding: 9px 10px;
+      outline: none;
+    }
+    .manual-points-form input:focus {
+      border-color: #3b82f6;
+    }
+    .manual-points-msg {
+      grid-column: 1 / -1;
+      min-height: 18px;
+      color: #64748b;
+      font-size: 12px;
+    }
+    .manual-points-msg.error {
+      color: #dc2626;
+    }
+    .manual-points-msg.success {
+      color: #047857;
+    }
+    @media (max-width: 700px) {
+      .manual-points-form {
+        grid-template-columns: 1fr;
+      }
+    }
     .subject-card.done {
       border-color: #86efac;
       background: #f0fdf4;
@@ -1359,6 +1398,16 @@
         <div class="stat-card"><span>今日已获</span><strong id="todayPointsText">0 / 12</strong></div>
       </div>
       <div>
+        <div class="mini-title">手动加分</div>
+        <div class="manual-points-form">
+          <input type="number" id="manualPointsAmount" min="1" step="1" inputmode="numeric" placeholder="积分数量">
+          <input type="text" id="manualPointsReason" maxlength="40" placeholder="增加原因">
+          <input type="password" id="manualPointsPassword" inputmode="numeric" placeholder="密码">
+          <button id="manualPointsBtn" class="btn green" style="padding:9px 14px;font-size:13px;">确认加分</button>
+          <div id="manualPointsMsg" class="manual-points-msg"></div>
+        </div>
+      </div>
+      <div>
         <div class="mini-title">今日四科打卡</div>
         <div class="subject-grid" id="subjectCheckinGrid"></div>
       </div>
@@ -1664,6 +1713,7 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("navPoints", "click", function() { openFeaturePage('points'); });
   safeAddListener("navPet", "click", function() { openFeaturePage('pet'); });
   safeAddListener("navShop", "click", function() { openFeaturePage('shop'); });
+  safeAddListener("manualPointsBtn", "click", handleManualPoints);
   safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
   safeAddListener("refreshDailyBtn", "click", refreshDailyChinese);
   safeAddListener("addWordBtn", "click", showAddWordModal);
@@ -1919,6 +1969,46 @@ function addAvailablePoints(state, amount, reason, subjectId = '', capDaily = fa
     subjectId
   });
   return actual;
+}
+
+function setManualPointsMessage(text, type = '') {
+  const msg = document.getElementById('manualPointsMsg');
+  if (!msg) return;
+  msg.className = 'manual-points-msg' + (type ? ' ' + type : '');
+  msg.innerText = text;
+}
+
+function handleManualPoints() {
+  const amountInput = document.getElementById('manualPointsAmount');
+  const reasonInput = document.getElementById('manualPointsReason');
+  const passwordInput = document.getElementById('manualPointsPassword');
+  const amount = Math.floor(Number(amountInput?.value || 0));
+  const reason = (reasonInput?.value || '').trim();
+  const password = passwordInput?.value || '';
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    setManualPointsMessage('请输入大于 0 的积分数量', 'error');
+    return;
+  }
+  if (!reason) {
+    setManualPointsMessage('请输入增加积分的原因', 'error');
+    return;
+  }
+  if (password !== '1220') {
+    setManualPointsMessage('密码不正确', 'error');
+    if (passwordInput) passwordInput.value = '';
+    return;
+  }
+
+  const state = getPointsState();
+  const actual = addAvailablePoints(state, amount, `手动加分 · ${reason}`, '', false);
+  savePointsState(state);
+  renderPointsUI();
+
+  if (amountInput) amountInput.value = '';
+  if (reasonInput) reasonInput.value = '';
+  if (passwordInput) passwordInput.value = '';
+  setManualPointsMessage(`已增加 ${actual} 积分`, 'success');
 }
 
 function spendAvailablePoints(state, amount, reason) {
