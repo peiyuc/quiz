@@ -956,7 +956,7 @@
     }
     .manual-points-form {
       display: grid;
-      grid-template-columns: 110px 1fr 110px auto;
+      grid-template-columns: 110px 150px 1fr 110px auto;
       gap: 8px;
       align-items: center;
       border: 1px solid #e2e8f0;
@@ -964,17 +964,27 @@
       background: #f8fafc;
       padding: 10px;
     }
-    .manual-points-form input {
+    .manual-points-form input,
+    .manual-points-form select {
       width: 100%;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
+      background: #fff;
       color: #1e293b;
       font-size: 14px;
       padding: 9px 10px;
       outline: none;
+      margin-left: 0;
     }
-    .manual-points-form input:focus {
+    .manual-points-form input:focus,
+    .manual-points-form select:focus {
       border-color: #3b82f6;
+    }
+    .manual-points-other {
+      display: none;
+    }
+    .manual-points-other.show {
+      display: block;
     }
     .manual-points-msg {
       grid-column: 1 / -1;
@@ -1401,7 +1411,14 @@
         <div class="mini-title">手动加分</div>
         <div class="manual-points-form">
           <input type="number" id="manualPointsAmount" min="1" step="1" inputmode="numeric" placeholder="积分数量">
-          <input type="text" id="manualPointsReason" maxlength="40" placeholder="增加原因">
+          <select id="manualPointsReason">
+            <option value="">选择原因</option>
+            <option value="刷牙干净">刷牙干净</option>
+            <option value="帮忙做家务">帮忙做家务</option>
+            <option value="IZ">IZ</option>
+            <option value="其他">其他</option>
+          </select>
+          <input type="text" id="manualPointsOtherReason" class="manual-points-other" maxlength="40" placeholder="填写具体原因">
           <input type="password" id="manualPointsPassword" inputmode="numeric" placeholder="密码">
           <button id="manualPointsBtn" class="btn green" style="padding:9px 14px;font-size:13px;">确认加分</button>
           <div id="manualPointsMsg" class="manual-points-msg"></div>
@@ -1714,6 +1731,7 @@ document.addEventListener("DOMContentLoaded", function(){
   safeAddListener("navPet", "click", function() { openFeaturePage('pet'); });
   safeAddListener("navShop", "click", function() { openFeaturePage('shop'); });
   safeAddListener("manualPointsBtn", "click", handleManualPoints);
+  safeAddListener("manualPointsReason", "change", updateManualPointsReasonUI);
   safeAddListener("chineseHistoryBtn", "click", showChineseDailyHistory);
   safeAddListener("refreshDailyBtn", "click", refreshDailyChinese);
   safeAddListener("addWordBtn", "click", showAddWordModal);
@@ -1978,12 +1996,30 @@ function setManualPointsMessage(text, type = '') {
   msg.innerText = text;
 }
 
+function updateManualPointsReasonUI() {
+  const reasonSelect = document.getElementById('manualPointsReason');
+  const otherInput = document.getElementById('manualPointsOtherReason');
+  if (!otherInput) return;
+  const isOther = reasonSelect?.value === '其他';
+  otherInput.classList.toggle('show', isOther);
+  if (!isOther) otherInput.value = '';
+}
+
+function getManualPointsReason() {
+  const reasonSelect = document.getElementById('manualPointsReason');
+  const otherInput = document.getElementById('manualPointsOtherReason');
+  const selected = (reasonSelect?.value || '').trim();
+  if (selected === '其他') return (otherInput?.value || '').trim();
+  return selected;
+}
+
 function handleManualPoints() {
   const amountInput = document.getElementById('manualPointsAmount');
-  const reasonInput = document.getElementById('manualPointsReason');
+  const reasonSelect = document.getElementById('manualPointsReason');
+  const otherInput = document.getElementById('manualPointsOtherReason');
   const passwordInput = document.getElementById('manualPointsPassword');
   const amount = Math.floor(Number(amountInput?.value || 0));
-  const reason = (reasonInput?.value || '').trim();
+  const reason = getManualPointsReason();
   const password = passwordInput?.value || '';
 
   if (!Number.isFinite(amount) || amount <= 0) {
@@ -1991,7 +2027,7 @@ function handleManualPoints() {
     return;
   }
   if (!reason) {
-    setManualPointsMessage('请输入增加积分的原因', 'error');
+    setManualPointsMessage(reasonSelect?.value === '其他' ? '请填写具体原因' : '请选择增加积分的原因', 'error');
     return;
   }
   if (password !== '1220') {
@@ -2006,7 +2042,11 @@ function handleManualPoints() {
   renderPointsUI();
 
   if (amountInput) amountInput.value = '';
-  if (reasonInput) reasonInput.value = '';
+  if (reasonSelect) reasonSelect.value = '';
+  if (otherInput) {
+    otherInput.value = '';
+    otherInput.classList.remove('show');
+  }
   if (passwordInput) passwordInput.value = '';
   setManualPointsMessage(`已增加 ${actual} 积分`, 'success');
 }
