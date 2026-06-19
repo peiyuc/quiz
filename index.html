@@ -732,6 +732,62 @@
       padding: 0 10px;
       font-size: 16px;
     }
+    .english-item {
+      align-items: stretch;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 16px;
+    }
+    .english-item .math-q {
+      min-width: 0;
+      line-height: 1.45;
+    }
+    .english-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .english-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 9px 10px;
+      color: #334155;
+      background: #f8fafc;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .english-option input {
+      width: 18px;
+      height: 18px;
+      accent-color: #2563eb;
+    }
+    .english-option.correct-choice {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #047857;
+      font-weight: bold;
+    }
+    .english-option.wrong-choice {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .english-explain {
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #64748b;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .english-item.wrong .english-explain,
+    .english-item.correct .english-explain {
+      display: block;
+    }
     .science-list {
       grid-template-columns: 1fr;
     }
@@ -792,6 +848,7 @@
       display: block;
     }
     @media (max-width: 600px) {
+      .english-options { grid-template-columns: 1fr; }
       .science-options { grid-template-columns: 1fr; }
     }
     .math-result {
@@ -3020,6 +3077,17 @@ let mathQuestions = [];
 let mathStartTime = null;
 let mathTimerInterval = null;
 const ENGLISH_COUNT = 10;
+const ENGLISH_EASY_WORDS = ['China', 'he', 'she', 'father', 'mother', 'man', 'woman', 'brother', 'sister', 'family', 'thin', 'fat', 'tall', 'short', 'long', 'small', 'big', 'on', 'in', 'under', 'chair', 'desk', 'cap', 'ball', 'car', 'boat', 'map', 'pear', 'apple', 'orange', 'banana', 'grape', 'eleven', 'twelve', 'thirteen'];
+const ENGLISH_SENTENCE_PATTERNS = [
+  { q: 'This is my ___.', answer: 'father', cn: '这是我的爸爸。', options: ['father', 'mother', 'brother', 'sister'] },
+  { q: 'This is my ___.', answer: 'mother', cn: '这是我的妈妈。', options: ['father', 'mother', 'brother', 'sister'] },
+  { q: 'He is my ___.', answer: 'brother', cn: '他是我的哥哥/弟弟。', options: ['father', 'mother', 'brother', 'sister'] },
+  { q: 'She is my ___.', answer: 'sister', cn: '她是我的姐姐/妹妹。', options: ['father', 'mother', 'brother', 'sister'] },
+  { q: 'The ball is ___ the desk.', answer: 'on', cn: '球在课桌上。', options: ['on', 'in', 'under'] },
+  { q: 'The cap is ___ the bag.', answer: 'in', cn: '帽子在书包里。', options: ['on', 'in', 'under'] },
+  { q: 'It is ___.', answer: 'big', cn: '它是大的。', options: ['big', 'small', 'tall', 'short'] },
+  { q: 'It is ___.', answer: 'small', cn: '它是小的。', options: ['big', 'small', 'tall', 'short'] }
+];
 let englishQuestions = [];
 let englishStartTime = null;
 let englishTimerInterval = null;
@@ -3038,12 +3106,17 @@ function getTodaySeed() {
   return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
 }
 
+function getTodayPracticeRound(recordKey) {
+  const records = JSON.parse(localStorage.getItem(recordKey) || '[]');
+  return records.filter(record => record.date === getLocalDateString()).length;
+}
+
 function randInt(min, max, seed) {
   return Math.floor(seededRandom(seed) * (max - min + 1)) + min;
 }
 
-function generateDailyMath() {
-  const seedBase = getTodaySeed();
+function generateDailyMath(round = 0) {
+  const seedBase = getTodaySeed() + round * 1000;
   const questions = [];
   // 5道加法
   for (let i = 0; i < 5; i++) {
@@ -3072,15 +3145,61 @@ function generateDailyMath() {
   return questions;
 }
 
-function generateDailyEnglish() {
-  const seedBase = getTodaySeed();
-  return [...englishLib]
-    .sort((a, b) => seededRandom(seedBase + a.word.charCodeAt(0)) - seededRandom(seedBase + b.word.charCodeAt(0)))
-    .slice(0, ENGLISH_COUNT);
+function generateDailyEnglish(round = 0) {
+  const seedBase = getTodaySeed() + round * 1000;
+  const easyWords = ENGLISH_EASY_WORDS
+    .map(word => englishLib.find(item => item.word === word))
+    .filter(Boolean);
+  const shuffledWords = [...easyWords]
+    .sort((a, b) => seededRandom(seedBase + a.word.charCodeAt(0)) - seededRandom(seedBase + b.word.charCodeAt(0)));
+  const cnToEn = shuffledWords.slice(0, 6).map((item, idx) => makeEnglishChoiceQuestion(item, 'cnToEn', seedBase + idx * 31));
+  const enToCn = shuffledWords.slice(6, 8).map((item, idx) => makeEnglishChoiceQuestion(item, 'enToCn', seedBase + 300 + idx * 31));
+  const sentences = ENGLISH_SENTENCE_PATTERNS
+    .map((item, idx) => ({ ...item, order: seededRandom(seedBase + 600 + idx) }))
+    .sort((a, b) => a.order - b.order)
+    .slice(0, 2)
+    .map((item, idx) => makeEnglishSentenceQuestion(item, seedBase + 700 + idx * 31));
+  return [...cnToEn, ...enToCn, ...sentences];
 }
 
-function generateDailyScience() {
-  const seedBase = getTodaySeed();
+function shuffleBySeed(items, seed) {
+  return [...items]
+    .map((item, idx) => ({ item, order: seededRandom(seed + idx * 17) }))
+    .sort((a, b) => a.order - b.order)
+    .map(entry => entry.item);
+}
+
+function makeEnglishChoiceQuestion(item, mode, seed) {
+  const pool = englishLib.filter(candidate => candidate.word !== item.word && ENGLISH_EASY_WORDS.includes(candidate.word));
+  const distractors = shuffleBySeed(pool, seed).slice(0, 3);
+  const choices = shuffleBySeed([item, ...distractors], seed + 100);
+  const answer = choices.findIndex(choice => choice.word === item.word);
+  return {
+    type: mode,
+    prompt: mode === 'cnToEn' ? `选出“${item.cn}”的英文。` : `选出 ${item.word} 的中文意思。`,
+    choices: choices.map(choice => mode === 'cnToEn' ? choice.word : choice.cn),
+    answer,
+    explain: `${item.word} = ${item.cn}`,
+    word: item.word
+  };
+}
+
+function makeEnglishSentenceQuestion(pattern, seed) {
+  const answerItem = englishLib.find(item => item.word === pattern.answer) || { word: pattern.answer, cn: pattern.answer };
+  const choices = shuffleBySeed(pattern.options || [pattern.answer], seed + 100);
+  const answer = choices.findIndex(choice => choice === pattern.answer);
+  return {
+    type: 'sentence',
+    prompt: `选择正确的单词补全句子：${pattern.q}`,
+    choices,
+    answer,
+    explain: `${pattern.q.replace('___', answerItem.word)} ${pattern.cn}`,
+    word: answerItem.word
+  };
+}
+
+function generateDailyScience(round = 0) {
+  const seedBase = getTodaySeed() + round * 1000;
   return [...scienceLib]
     .map((item, idx) => ({ ...item, originalIndex: idx }))
     .sort((a, b) => seededRandom(seedBase + 300 + a.originalIndex) - seededRandom(seedBase + 300 + b.originalIndex))
@@ -3088,8 +3207,8 @@ function generateDailyScience() {
     .map((item, idx) => ({ ...item, dailyIndex: idx }));
 }
 
-function shuffleScienceOptions(item) {
-  const seedBase = getTodaySeed() + 700 + item.originalIndex;
+function shuffleScienceOptions(item, round = 0) {
+  const seedBase = getTodaySeed() + round * 1000 + 700 + item.originalIndex;
   const shuffled = item.options
     .map((text, idx) => ({ text, originalIndex: idx }))
     .sort((a, b) => seededRandom(seedBase + a.originalIndex) - seededRandom(seedBase + b.originalIndex));
@@ -3142,7 +3261,7 @@ function startMath() {
   const submitBtn = document.getElementById('mathSubmitBtn');
   const result = document.getElementById('mathResult');
 
-  mathQuestions = generateDailyMath();
+  mathQuestions = generateDailyMath(getTodayPracticeRound('mathDailyRecords'));
   if (list) list.innerHTML = '';
   if (result) result.classList.remove('show');
 
@@ -3278,14 +3397,18 @@ function startEnglish() {
   const submitBtn = document.getElementById('englishSubmitBtn');
   const result = document.getElementById('englishResult');
 
-  englishQuestions = generateDailyEnglish();
+  englishQuestions = generateDailyEnglish(getTodayPracticeRound('englishDailyRecords'));
   if (list) list.innerHTML = '';
   if (result) result.classList.remove('show');
 
   englishQuestions.forEach((item, idx) => {
     const div = document.createElement('div');
     div.className = 'math-item english-item';
-    div.innerHTML = `<span class="math-q">${idx + 1}. ${item.cn}</span><input type="text" class="math-input" id="english-${idx}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span class="math-ans">答案: ${item.word}</span>`;
+    const optionsHtml = item.choices.map((option, optIdx) => {
+      const letter = String.fromCharCode(65 + optIdx);
+      return `<label class="english-option" id="english-${idx}-choice-${optIdx}"><input type="radio" name="english-${idx}" value="${optIdx}"><span>${letter}. ${option}</span></label>`;
+    }).join('');
+    div.innerHTML = `<span class="math-q">${idx + 1}. ${item.prompt}</span><div class="english-options">${optionsHtml}</div><div class="english-explain">答案：${String.fromCharCode(65 + item.answer)}。${item.explain}</div>`;
     if (list) list.appendChild(div);
   });
 
@@ -3310,18 +3433,20 @@ function submitEnglish() {
   let correct = 0;
 
   englishQuestions.forEach((item, idx) => {
-    const input = document.getElementById(`english-${idx}`);
-    if (!input) return;
-    const div = input.parentElement;
-    const val = normalizeEnglishAnswer(input.value);
-    const answers = (item.aliases || [item.word]).map(normalizeEnglishAnswer);
-    if (answers.includes(val)) {
-      div.classList.add('correct');
+    const selected = document.querySelector(`input[name="english-${idx}"]:checked`);
+    const itemEl = selected ? selected.closest('.english-item') : document.querySelector(`#english-${idx}-choice-0`)?.closest('.english-item');
+    const selectedIndex = selected ? Number(selected.value) : -1;
+    const correctChoice = document.getElementById(`english-${idx}-choice-${item.answer}`);
+    if (correctChoice) correctChoice.classList.add('correct-choice');
+    if (selectedIndex === item.answer) {
       correct++;
+      if (itemEl) itemEl.classList.add('correct');
     } else {
-      div.classList.add('wrong');
-      input.disabled = true;
+      const wrongChoice = document.getElementById(`english-${idx}-choice-${selectedIndex}`);
+      if (wrongChoice) wrongChoice.classList.add('wrong-choice');
+      if (itemEl) itemEl.classList.add('wrong');
     }
+    document.querySelectorAll(`input[name="english-${idx}"]`).forEach(input => { input.disabled = true; });
   });
 
   const scoreText = document.getElementById('englishScoreText');
@@ -3404,7 +3529,8 @@ function startScience() {
   const submitBtn = document.getElementById('scienceSubmitBtn');
   const result = document.getElementById('scienceResult');
 
-  scienceQuestions = generateDailyScience().map(item => ({ ...item, choiceData: shuffleScienceOptions(item) }));
+  const scienceRound = getTodayPracticeRound('scienceDailyRecords');
+  scienceQuestions = generateDailyScience(scienceRound).map(item => ({ ...item, choiceData: shuffleScienceOptions(item, scienceRound) }));
   if (list) list.innerHTML = '';
   if (result) result.classList.remove('show');
 
