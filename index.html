@@ -2180,6 +2180,11 @@ function normalizePet(pet, fallbackTheme = 'forest') {
   };
 }
 
+function isPetStageUnlocked(pet, stageId) {
+  if (!pet) return false;
+  return PET_STAGE_INDEX[pet.stage] >= PET_STAGE_INDEX[stageId];
+}
+
 function getCurrentPet(state) {
   if (!state.pets || state.pets.length === 0) return null;
   return state.pets.find(pet => String(pet.id) === String(state.activePetId)) || state.pets[0];
@@ -2219,7 +2224,8 @@ function setPetTheme(themeId) {
 
 function grantCodexRewardIfNeeded(state) {
   if (state.codexRewardClaimed) return;
-  if (state.unlockedStages.child && state.unlockedStages.teen && state.unlockedStages.adult) {
+  const hasAdultPet = (state.pets || []).some(pet => isPetStageUnlocked(pet, 'adult'));
+  if (hasAdultPet || (state.unlockedStages.child && state.unlockedStages.teen && state.unlockedStages.adult && (state.pets || []).length <= 1)) {
     state.codexRewardClaimed = true;
     addAvailablePoints(state, 6, '精灵图鉴全解锁奖励', '', false);
   }
@@ -2454,7 +2460,6 @@ function advancePetStage(state, pet = getCurrentPet(state)) {
     if (!stage.next || pet.progress < stage.threshold) break;
     pet.progress -= stage.threshold;
     pet.stage = stage.next;
-    state.unlockedStages[stage.next] = true;
   }
 }
 
@@ -2539,13 +2544,13 @@ function renderCodex(state) {
   const reward = document.getElementById('codexRewardText');
   if (!list) return;
   list.innerHTML = '';
+  const currentPet = getCurrentPet(state);
+  const themeId = currentPet ? getPetTheme(currentPet.theme).id : getPetTheme(state.petTheme).id;
   ['child', 'teen', 'adult'].forEach(stageId => {
     const stage = getStageMeta(stageId);
     const pill = document.createElement('span');
-    const unlocked = !!state.unlockedStages[stageId];
+    const unlocked = isPetStageUnlocked(currentPet, stageId);
     pill.className = 'pill codex-pill' + (unlocked ? '' : ' locked');
-    const currentPet = getCurrentPet(state);
-    const themeId = currentPet ? getPetTheme(currentPet.theme).id : getPetTheme(state.petTheme).id;
     pill.innerHTML = `${getPetVisualHtml(stage.id, themeId, 'codex-thumb')}<span>${stage.name} ${unlocked ? '已解锁' : '未解锁'}</span>`;
     list.appendChild(pill);
   });
