@@ -1262,6 +1262,7 @@
       <option value="6">第六单元</option>
       <option value="7">第七单元</option>
       <option value="8">第八单元</option>
+      <option value="9">考前复习</option>
     </select>
     <select id="lessonSelect">
       <option value="all">全部课文</option>
@@ -1606,7 +1607,8 @@ const lessonMap = {
   "5": [{ id: "16", name: "第16课《胡萝卜先生的长胡子》" }, { id: "17", name: "第17课《我变成了一棵树》" }],
   "6": [{ id: "18", name: "第18课《童年的水墨画》" }, { id: "19", name: "第19课《肥皂泡》" }],
   "7": [{ id: "22", name: "第22课《火烧云》" }, { id: "23", name: "第23课《暴风雨来临之前》" }],
-  "8": [{ id: "25", name: "第25课《慢性子裁缝和急性子顾客》" }, { id: "26", name: "第26课《漏》" }, { id: "27", name: "第27课《枣核》" }, { id: "28", name: "语文园地八" }]
+  "8": [{ id: "25", name: "第25课《慢性子裁缝和急性子顾客》" }, { id: "26", name: "第26课《漏》" }, { id: "27", name: "第27课《枣核》" }, { id: "28", name: "语文园地八" }],
+  "9": [{ id: "review", name: "考前必备复习" }]
 };
 
 let currentIdx = 0; 
@@ -1783,7 +1785,7 @@ document.addEventListener("DOMContentLoaded", function(){
       chineseHistoryBtn.style.display = typeSelect.value === 'daily-chinese' ? 'inline-flex' : 'none';
     }
     if (chineseDailyHistory) { chineseDailyHistory.classList.remove('show'); chineseDailyHistory.innerHTML = ''; }
-    renderWord();
+    filterWord();
   });
   safeAddListener("prevBtn", "click", prevWord);
   safeAddListener("nextBtn", "click", nextWord);
