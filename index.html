@@ -2444,11 +2444,45 @@ function renderShop(state) {
   });
 }
 
-function hatchPetEgg() {
+function getNextHatchableTheme(state) {
+  return PET_THEMES.find(theme => !getPetByTheme(state, theme.id)) || null;
+}
+
+function hatchPetEgg(themeId = '') {
   const state = getPointsState();
-  const theme = getPetTheme(state.petTheme);
+  let theme = getPetTheme(themeId || state.petTheme);
   const ownedPet = getPetByTheme(state, theme.id);
   if (ownedPet) {
+    const nextTheme = getNextHatchableTheme(state);
+    if (!nextTheme) {
+      state.activePetId = ownedPet.id;
+      syncActivePet(state);
+      savePointsState(state);
+      renderPointsUI();
+      alert('已经拥有全部精灵啦');
+      return;
+    }
+    if ((state.inventory.egg || 0) <= 0) {
+      state.activePetId = ownedPet.id;
+      syncActivePet(state);
+      savePointsState(state);
+      renderPointsUI();
+      alert('背包里还没有精灵蛋，请先去积分商城兑换');
+      return;
+    }
+    theme = nextTheme;
+  }
+  if ((state.inventory.egg || 0) <= 0) {
+    if (ownedPet) {
+      state.activePetId = ownedPet.id;
+      syncActivePet(state);
+      savePointsState(state);
+      renderPointsUI();
+    }
+    alert('背包里还没有精灵蛋，请先去积分商城兑换');
+    return;
+  }
+  if (getPetByTheme(state, theme.id)) {
     state.activePetId = ownedPet.id;
     syncActivePet(state);
     savePointsState(state);
@@ -2456,12 +2490,9 @@ function hatchPetEgg() {
     alert(`已经拥有${theme.name}精灵，已切换为当前精灵`);
     return;
   }
-  if ((state.inventory.egg || 0) <= 0) {
-    alert('背包里还没有精灵蛋，请先去积分商城兑换');
-    return;
-  }
   const pet = { id: Date.now(), stage: 'egg', progress: 0, theme: theme.id };
   state.inventory.egg--;
+  state.petTheme = theme.id;
   state.pets.push(pet);
   state.activePetId = pet.id;
   syncActivePet(state);
@@ -2564,8 +2595,11 @@ function renderPetThemes(state) {
     btn.type = 'button';
     btn.innerHTML = `${getPetVisualHtml(stageId, theme.id, 'codex-thumb')}<span>${theme.name}</span><span>${ownedPet ? (isCurrent ? '当前精灵' : '已拥有') : (canHatch ? '可孵化' : '待兑换蛋')}</span>`;
     btn.onclick = () => {
-      setPetTheme(theme.id);
-      if (!ownedPet && canHatch) hatchPetEgg();
+      if (!ownedPet && canHatch) {
+        hatchPetEgg(theme.id);
+      } else {
+        setPetTheme(theme.id);
+      }
     };
     grid.appendChild(btn);
   });
